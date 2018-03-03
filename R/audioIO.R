@@ -13,9 +13,14 @@ readAudioFile <- function(filepath){
     waveObj = readWave(filepath)
   }
 
+  #audio file extracted. Applying Pre-processing.
   if (waveObj@stereo == TRUE){
   waveObj = mono(waveObj)
   }
-  return(list(waveObj@samp.rate, waveObj@left))
 
+  waveObj = noSilence(waveObj)
+  waveObj = normalize(waveObj)
+
+  #return(list(waveObj@samp.rate, waveObj@left))
+  return(waveObj)
 }
