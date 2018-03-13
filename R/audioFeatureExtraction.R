@@ -1,7 +1,7 @@
 library("seewave")
 eps = 0.00000001
 
-#frame is a tuneR wave class object
+#frame will have to be converted into a vector
 
 ##Time-domain audio features
 
@@ -39,9 +39,8 @@ stEnergyEntropy<-function(frame, numOfShortBlocks){
 
 ##Frequency-domain audio features
 
-stSpectralCentroidAndSpread<-function(X1)
+stSpectralCentroidAndSpread<-function(X)
 {
-  X = spec(X1)
   fs = X1@samp.rate
   print(X)
   ind<-array(seq(1,length(X)+1))*(fs/(2.0*length(X)))
@@ -58,7 +57,7 @@ stSpectralCentroidAndSpread<-function(X1)
 }
 
 
-stEnergyEntropy<-function(X1, numOfShortBlocks)
+stSpectralEntropy<-function(X1, numOfShortBlocks)
 {
   if (missing(numOfShortBlocks)){
     numOfShortBlocks<-10
