@@ -1,5 +1,5 @@
 library("seewave")
-eps = 0.00000001
+#eps = 0.00000001
 
 #frame will have to be converted into a vector
 
