@@ -19,7 +19,6 @@ stEnergy <- function(frame){
 stEnergyEntropy<-function(frame, numOfShortBlocks){
   if(missing(numOfShortBlocks)){
     numOfShortBlocks = 10
-    d<-e
   }
 
   Eol <- sum(frame@left ** 2)
