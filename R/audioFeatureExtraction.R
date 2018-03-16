@@ -128,5 +128,73 @@ stChormaFeaturesInit<-function(nfft,fs)
 }
 
 
+mfccInitFilterBanks<-function(fs,nfft)
+{
+  
+  print(cat("freqs", freqs))  
+  lowfreq=133.33
+  linsc=200/3
+  logsc=1.0711703
+  numLinFiltTotal=13
+  numLogFilt<-27
+  if(fs<8000)
+  {
+    nlogfil<-5
+  }
+  nFiltTotal = numLinFiltTotal+numLogFilt
+  print(nFiltTotal)
+  freqs = rep(0,nFiltTotal+2)
+  print(length(freqs))
+  l=length(freqs)
+  numLinFiltTotalu=numLinFiltTotal-1
+  freqs[1:numLinFiltTotal]<-lowfreq+(seq(numLinFiltTotal)*linsc)
+  print(freqs)
+  freqs[numLinFiltTotal+1:l]<-freqs[numLinFiltTotal]*logsc
+  print(freqs)#**
+  po=seq(1,numLogFilt+2)
+  po
+  print(freqs[numLinFiltTotal+1:l])
+  freqs[numLinFiltTotal+1:l]<-freqs[numLinFiltTotal+1:l]^po
+  heights<-2.0/(freqs[2:l]-freqs[0:-2])
+  
+  fbank<-matrix(0,nFiltTotal,nfft)
+  nfreqs<-seq(nfft-1)/(1.0*nfft)*fs
+  for (i in seq(1:nFiltTotal-1))
+  {
+    print(cat("i = ", i))
+    print(freqs[i])
+    lowTrFreq=freqs[i]
+    cenTrFreq=freqs[i+1]
+    highTrFreq=freqs[i+2]
+    print(cat("aaa", floor(lowTrFreq*(nfft/fs)) + 1))
+    lid=seq(floor(lowTrFreq*(nfft/fs))+1,floor(cenTrFreq*(nfft/fs)))
+    print(cat("lid", lid))
+    lslope=heights[i]/(cenTrFreq-lowTrFreq)
+    print(cat("lslope", lslope))
+    rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
+    print(cat("rid", rid))
+    rslope=heights[i]/(highTrFreq-cenTrFreq)
+    print(cat("rslopeprint(cat("rid", rid))print(cat("rid", rid))", rslope))
+    fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
+    fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
+  }
+  #print(fbank)
+  #print(freqs)
+  
+  
+}
+fs=1000
+nfft=50
+mfccInitFilterBanks(fs,nfft)
+
+a=rep(0,20)
+a
+a=seq(1,14)
+a=seq(15,20)
+a[1:2]
+
+
+
+
 
 
