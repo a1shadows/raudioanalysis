@@ -131,16 +131,17 @@ stChormaFeaturesInit<-function(nfft,fs)
 mfccInitFilterBanks<-function(fs,nfft)
 {
   
-  print(cat("freqs", freqs))  
   lowfreq=133.33
   linsc=200/3
   logsc=1.0711703
   numLinFiltTotal=13
   numLogFilt<-27
+  
   if(fs<8000)
   {
     nlogfil<-5
   }
+  
   nFiltTotal = numLinFiltTotal+numLogFilt
   
   freqs = rep(0,nFiltTotal+2)
@@ -180,7 +181,7 @@ mfccInitFilterBanks<-function(fs,nfft)
   rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
   print(cat("rid", rid))
   rslope=heights[i]/(highTrFreq-cenTrFreq)
-  print(cat("rslopeprint(cat("rid", rid))print(cat("rid", rid))", rslope))
+  #print(cat("rslope", print(cat("rid", rid))print(cat("rid", rid))", rslope))
   fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
   fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
 }
@@ -188,10 +189,80 @@ mfccInitFilterBanks<-function(fs,nfft)
 #print(freqs)
 
 
+#fs=1
+#nfft=5
+#mfccInitFilterBanks(fs,nfft)
+
+stFeatureExtraction <- function(signal, win, step){
+  Fs = signal@samp.rate
+  Win = as.integer(win)
+  Step = as.integer(step)
+  
+  #Signal normalized at input stage
+  
+  N = len(signal@left)
+  curPos = 0
+  countFrames = 0
+  nFFT = Win / 2
+  
+  mfccInitFilterBanksReturns = mfccInitFilterBanks(Fs, nFFT)
+  fbank = mfccInitFilterBanksReturns[1]
+  freqs = mfccInitFilterBanksReturns[2]
+  
+  stChromaFeaturesInitReturns = stChromaFeaturesInit(nFFT, Fs)
+  nChroma = stChromaFeaturesInitReturns[1]
+  nFreqsPerChroma = stChromaFeaturesInitReturns[2]
+  
+  numOfTimeSpectralFeatueres = 8
+  numOfHarmonicFeatures = 0
+  nceps = 13
+  numOfChromaFeatures = 13
+  totalNumOfFeatures = numOfTimeSpectralFeatures + nceps + numOfHarmonicFeatures + numOfChromaFeatures
+  
+  stFeatures = list()
+  while (curPos + Win - 1 < N){
+    countFrames = countFrames +  1
+    x = signal@left[curPos:curPos + Win - 1]
+    curPos = curPos + Step
+    X = abs(fft(x))
+    X = X[1:nFFT]
+    X = X / length(X)
+    if (countFrames == 1){
+      Xprev = c()
+      for(i in X){
+        Xprev = c(Xprev, i)
+      }
+    }
+    curFV = rep(0, totalNumOfFeatures)
+    
+    curFV[1] = stZCR(x)                              # zero crossing rate
+    curFV[2] = stEnergy(x)                           # short-term energy
+    curFV[3] = stEnergyEntropy(x)                    # short-term entropy of energy
+    stSpectralCentroidAndSpreadReturns = stSpectralCentroidAndSpread(X, Fs) # spectral centroid and spread
+    curFV[4] = stSpectralCentroidAndSpreadReturns[1]  
+    curFV[5] = stSpectralCentroidAndSpreadReturns[2]   
+    curFV[6] = stSpectralEntropy(X)                  # spectral entropy
+    curFV[7] = stSpectralFlux(X, Xprev)              # spectral flux
+    curFV[8] = stSpectralRollOff(X, 0.90, Fs)        # spectral rolloff
+    curFV[numOfTimeSpectralFeatures + 1 : numOfTimeSpectralFeatures+nceps] = stMFCC(X, fbank, nceps).copy()    # MFCCs
+    
+    stChromaFeaturesReturns = stChormaFeatures(X, Fs, nChroma, nFreqsPerChroma)
+    chromaNames = stChromaFeaturesReturns[1]
+    chromaF = stChromaFeaturesReturns[2]
+    curFV[numOfTimeSpectralFeatueres + nceps + 1 : numOfTimeSpectralFeatueres + nceps + numOfChromaFeatures] = chromaF
+    curFV[numOfTimeSpectralFeatures + nceps + numOfChromaFeatures] = std(chromaF)
+    stFeatures = c(stFeatures, curFV)
+  
+    for(i in X){
+      Xprev = c(Xprev, i)
+    }
+  }
+  
+  #stFeatures = numpy.concatenate(stFeatures, 1) #Doubt
+  return (stFeatures)
+  
 }
-fs=1
-nfft=5
-mfccInitFilterBanks(fs,nfft)
+
 
 
 
