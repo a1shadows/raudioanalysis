@@ -57,23 +57,3 @@ stSpectralCentroidAndSpread<-function(X)
 }
 
 
-stSpectralEntropy<-function(X1, numOfShortBlocks)
-{
-  if (missing(numOfShortBlocks)){
-    numOfShortBlocks<-10
-  }
-
-  Eol = sum(X ** 2)
-  L = length(X)
-  subWinLength = as.integer(floor(L/numOfShortBlocks))
-  if(L != (subWinLength * numOfShortBlocks))
-  {
-    X =  X[1: subWinLength * numOfShortBlocks + 1]
-  }
-
-  subWindows = matrix(X, subWinLength, numOfShortBlocks, byrow = TRUE)
-  s = colSums(subWindows ** 2, na.rm = FALSE, dims = 1) / (Eol + eps)
-  En =  (-sum(s * log2(s + eps)))
-  return (En)
-}
-
