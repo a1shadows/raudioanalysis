@@ -1,4 +1,5 @@
 library("seewave")
+
 eps = 0.00000001
 
 #frame will have to be converted into a vector
@@ -491,5 +492,19 @@ arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
 #print(cat(arr))
 stHarmonic(arr , 10000)
 
+
+library("dtt")
+stMFCC<-function(X, fbank, nceps)
+{
+  mspec<-log10((X %% t(fbank))+eps)
+  ceps<-dct(mspec)[1:nceps]
+  
+  return(ceps)
+}
+
+f<-c(1,2,3,4)
+p<-
+x<-3
+print(stMFCC(x,f,p))
 
 
