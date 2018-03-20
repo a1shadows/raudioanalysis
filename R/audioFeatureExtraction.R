@@ -263,9 +263,87 @@ stFeatureExtraction <- function(signal, win, step){
   
 }
 
+mtFeatureExtraction(signal, mtWin, mtStep, stWin, stStep) {
+  
+  Fs = signal@samp.rate
+  mtWinRatio = as.integer(round(mtWin / stStep))
+  mtStepRatio = as.integer(round(mtStep / stStep))
+  
+  mtFeatures = list()
+  
+  stFeatures = stFeatureExtraction(signal, stWin, stStep)
+  numOfFeatures = length(srFeatures)
+  numOfStatistics = 2
+  
+  for (i in 1 : numOfStatistics * numOfFeatures){
+    mtFeatures = list(mtFeatures, list())
+    
+  }
+  
+  for (i in 1:numOfFeatures){
+    curPos = 1
+    N = length(stFeatures[i])
+    while(curpos < N){
+      N1 = curPos
+      N2 = curPos + mtWinRatio
+      if (N2 > N1){
+        N2 = N
+      }
+      curStFeatures = stFeatures[i][N1:N2 + 1]
+      
+      mtFeatures[i] = list(mtFeatures[i], mean(curStFeatures))
+      mtFeatures[i + numOfFeatures] = list(mtFeatures[i + numOfFeatures], sd(curStFeatures))
+      curPos = curPos + mtStepRatio
+    }
+  }
+  return (list(mtFeatures, stFeatures))
+}
 
-
-
+stFeatureSpeed <- function(signal, Win, Step){
+  
+  Fs = signal@samp.rate
+  
+  N = length(signal)
+  curPos = 1
+  countFrames = 0
+  
+  lowfreq = 133.33
+  linsc = 200/3.
+  logsc = 1.0711703
+  nlinfil = 13
+  nlogfil = 27
+  nceps = 13
+  nfil = nlinfil + nlogfil
+  nfft = Win / 2
+  if(Fs < 8000){
+    nlogfil = 5
+    nfil = nlinfil + nlogfil
+    nfft = Win / 2
+  }
+  mfccInitFilterBanksReturns = mfccInitFilterBanks(Fs, nfft, lowfreq, linsc, logsc, nlinfil, nlogfil)
+  fbank = mfccInitFilterBanksReturns[1]
+  freqs = mfccInitFilterBanksReturns[2]
+  
+  numOfTimeSpectralFeatures = 8
+  numOfHarmonicFeatures = 1
+  totalNumOfFeatures = numOfTimeSpectralFeatures + nceps + numOfHarmonicFeatures
+  stFeatures = list()
+  
+  while (curPos + Win <= N){
+    countFrames = countFrames + 1
+    x = signal@left[curPos : curPos + Win]
+    curPos = curPos + Step
+    X = abs(fft(x))
+    X = X[1 : nfft]
+    X = X / length(X)
+    Ex = 0.0
+    E1 = 0.0
+    X[1 : 4] = 0
+    stFeatures = list(stFeatures, stHarmonic(x, Fs))
+  }
+    
+  return (stFeatures)
+}
 
 
 
