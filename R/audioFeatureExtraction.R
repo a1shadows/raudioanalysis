@@ -131,7 +131,7 @@ stChormaFeaturesInit<-function(nfft,fs)
 mfccInitFilterBanks<-function(fs,nfft)
 {
   
-  
+  print(cat("freqs", freqs))  
   lowfreq=133.33
   linsc=200/3
   logsc=1.0711703
@@ -151,7 +151,6 @@ mfccInitFilterBanks<-function(fs,nfft)
   
   print(numLinFiltTotalu:l)
   freqs[numLinFiltTotal:l]<-freqs[numLinFiltTotal]*logsc
-  
   po=seq(1,numLogFilt+2)
   po
   freqs[numLinFiltTotalu:l]<-freqs[numLinFiltTotalu:l]^po
@@ -192,6 +191,8 @@ mfccInitFilterBanks<-function(fs,nfft)
 fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
+
+
 
 
 
