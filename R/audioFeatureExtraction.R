@@ -263,7 +263,7 @@ stFeatureExtraction <- function(signal, win, step){
   
 }
 
-mtFeatureExtraction(signal, mtWin, mtStep, stWin, stStep) {
+mtFeatureExtraction <- function(signal, mtWin, mtStep, stWin, stStep) {
   
   Fs = signal@samp.rate
   mtWinRatio = as.integer(round(mtWin / stStep))
