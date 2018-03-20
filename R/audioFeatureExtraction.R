@@ -518,3 +518,58 @@ x<-3
 print(stMFCC(x,f,p))
 
 
+library("shape")
+stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
+{
+  chromaNames<-list('A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#')
+  spec<-X^2 
+  print(max(nChroma))
+  print(ncol(nChroma))
+  if (max(nChroma)<length(nChroma))
+  {
+    l<-NROW(nChroma)
+    print(l)
+    print(nChroma)
+    C=matrix(0,l,1) #C = numpy.zeros((nChroma.shape[0],)) convert in r
+    C[nChroma]<- spec
+    C<-C/ nFreqsPerChroma[nChroma]
+  }
+  else
+  {
+    which(nChroma>length(nchroma))
+    I<-(nChroma>length(nchroma))[0][0] 
+  #convert in r #see in main document
+    l<-NROW(nChroma)
+    print(l)
+    print(nChroma)
+    C=matrix(0,l,1)
+                #convert in r # see in main document
+    C[nChroma[1:I]]<-spec   
+    C<-C/ nFreqsPerChroma[nChroma]
+  }
+  
+  finalC<-zeros(12, 1)
+  newD<-as.integer(ceil(length(C) / 12.0) * 12)
+  g<-NROW(newD)
+  C2=matrix(0,g,1)
+ 
+  
+  C2<-reshape(length(C2)/12, 12) #confirm this line
+  finalC<-t(matrix(sum(C2))) #confirm this line
+  finalC<-finalC/sum(spec)
+  a<-list(chromaNames, finalC)
+  
+  return (a)
+  
+}
+
+
+X<-10
+fs<-c(1,2,3,4,4,5,55)
+nChroma<-c(3,4,27,5,68,980)
+nFreqsPerChroma<-c(45,23,3,44,5,2,4)
+
+print(stChromaFeatures(X, fs, nChroma, nFreqsPerChroma))
+
+
+
