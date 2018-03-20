@@ -131,7 +131,7 @@ stChormaFeaturesInit<-function(nfft,fs)
 mfccInitFilterBanks<-function(fs,nfft)
 {
   
-  print(cat("freqs", freqs))  
+  
   lowfreq=133.33
   linsc=200/3
   logsc=1.0711703
@@ -148,14 +148,15 @@ mfccInitFilterBanks<-function(fs,nfft)
   l=length(freqs)
   numLinFiltTotalu=numLinFiltTotal+1
   freqs[1:numLinFiltTotal]<-lowfreq+(seq(numLinFiltTotal)*linsc)
-  
-  print(numLinFiltTotalu:l)
-  freqs[numLinFiltTotal:l]<-freqs[numLinFiltTotal]*logsc
+  freqs
   po=seq(1,numLogFilt+2)
   po
-  freqs[numLinFiltTotalu:l]<-freqs[numLinFiltTotalu:l]^po
+  print(numLinFiltTotalu:l)
+  freqs[numLinFiltTotal:l]<-freqs[numLinFiltTotal]*logsc^po
+  freqs
   m=l-1
   heights<-2.0/(freqs[2:l]-freqs[1:m])
+  heights
   fbank<-matrix(0,nFiltTotal,nfft)
   m1=nfft-1
   nfreqs<-seq(m1)/(1.0*nfft)*fs
@@ -166,33 +167,36 @@ mfccInitFilterBanks<-function(fs,nfft)
     lowTrFreq=freqs[i]
     cenTrFreq=freqs[i+1]
     highTrFreq=freqs[i+2]
+    k1=floor(lowTrFreq*(nfft/fs))+1
+    k2=floor(cenTrFreq*(nfft/fs))
+    k1
+    k2
+    print(k2-k1)
+    lid=seq(k1,k2)
+    print(length(lid))
+    print(cat("lid", lid))
+    lslope=heights[i]/(cenTrFreq-lowTrFreq)
+    print(cat("lslope", lslope))
+    k3=floor(cenTrFreq*nfft/fs)+1
+    k4=floor(highTrFreq*nfft)/fs
+    rid=seq(k3,k4)
+    print(cat("rid", rid))
+    
+    rslope=heights[i]/(highTrFreq-cenTrFreq)
+    rslope
+    #print(cat("rslopeprint(cat("rid", rid))print(cat("rid", rid))", rslope))
+    fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
+    fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
   }
-  
-  k1=floor(lowTrFreq*(nfft/fs))+1
-  k2=floor(cenTrFreq*(nfft/fs))
-  k1
-  k2
-  #############################################################
-  lid=seq(k1,k2)
-  print(cat("lid", lid))
-  lslope=heights[i]/(cenTrFreq-lowTrFreq)
-  print(cat("lslope", lslope))
-  rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
-  print(cat("rid", rid))
-  rslope=heights[i]/(highTrFreq-cenTrFreq)
-  print(cat("rslopeprint(cat("rid", rid))print(cat("rid", rid))", rslope))
-  fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
-  fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
+  print(fbank)
+  print(freqs)
 }
-#print(fbank)
-#print(freqs)
 
 
-}
+
 fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
-
 
 
 
