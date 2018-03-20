@@ -131,16 +131,17 @@ stChormaFeaturesInit<-function(nfft,fs)
 mfccInitFilterBanks<-function(fs,nfft)
 {
   
-  print(cat("freqs", freqs))  
   lowfreq=133.33
   linsc=200/3
   logsc=1.0711703
   numLinFiltTotal=13
   numLogFilt<-27
+  
   if(fs<8000)
   {
     nlogfil<-5
   }
+  
   nFiltTotal = numLinFiltTotal+numLogFilt
   
   freqs = rep(0,nFiltTotal+2)
@@ -180,22 +181,325 @@ mfccInitFilterBanks<-function(fs,nfft)
   rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
   print(cat("rid", rid))
   rslope=heights[i]/(highTrFreq-cenTrFreq)
+<<<<<<< HEAD
   #print(cat("rslopeprint(cat('rid', rid))print(cat('rid', rid))", rslope))
+=======
+  #print(cat("rslope", print(cat("rid", rid))print(cat("rid", rid))", rslope))
+>>>>>>> 59e5f24b49f3e8b0d838348ca7342d9bb73502e9
   fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
   fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
 }
 
 
+<<<<<<< HEAD
 
 
 fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
+=======
+#fs=1
+#nfft=5
+#mfccInitFilterBanks(fs,nfft)
+
+stFeatureExtraction <- function(signal, win, step){
+  Fs = signal@samp.rate
+  Win = as.integer(win)
+  Step = as.integer(step)
+  
+  #Signal normalized at input stage
+  
+  N = len(signal@left)
+  curPos = 0
+  countFrames = 0
+  nFFT = Win / 2
+  
+  mfccInitFilterBanksReturns = mfccInitFilterBanks(Fs, nFFT)
+  fbank = mfccInitFilterBanksReturns[1]
+  freqs = mfccInitFilterBanksReturns[2]
+  
+  stChromaFeaturesInitReturns = stChromaFeaturesInit(nFFT, Fs)
+  nChroma = stChromaFeaturesInitReturns[1]
+  nFreqsPerChroma = stChromaFeaturesInitReturns[2]
+  
+  numOfTimeSpectralFeatueres = 8
+  numOfHarmonicFeatures = 0
+  nceps = 13
+  numOfChromaFeatures = 13
+  totalNumOfFeatures = numOfTimeSpectralFeatures + nceps + numOfHarmonicFeatures + numOfChromaFeatures
+  
+  stFeatures = list()
+  while (curPos + Win - 1 < N){
+    countFrames = countFrames +  1
+    x = signal@left[curPos:curPos + Win - 1]
+    curPos = curPos + Step
+    X = abs(fft(x))
+    X = X[1:nFFT]
+    X = X / length(X)
+    if (countFrames == 1){
+      Xprev = c()
+      for(i in X){
+        Xprev = c(Xprev, i)
+      }
+    }
+    curFV = rep(0, totalNumOfFeatures)
+    
+    curFV[1] = stZCR(x)                              # zero crossing rate
+    curFV[2] = stEnergy(x)                           # short-term energy
+    curFV[3] = stEnergyEntropy(x)                    # short-term entropy of energy
+    stSpectralCentroidAndSpreadReturns = stSpectralCentroidAndSpread(X, Fs) # spectral centroid and spread
+    curFV[4] = stSpectralCentroidAndSpreadReturns[1]  
+    curFV[5] = stSpectralCentroidAndSpreadReturns[2]   
+    curFV[6] = stSpectralEntropy(X)                  # spectral entropy
+    curFV[7] = stSpectralFlux(X, Xprev)              # spectral flux
+    curFV[8] = stSpectralRollOff(X, 0.90, Fs)        # spectral rolloff
+    curFV[numOfTimeSpectralFeatures + 1 : numOfTimeSpectralFeatures+nceps] = stMFCC(X, fbank, nceps).copy()    # MFCCs
+    
+    stChromaFeaturesReturns = stChormaFeatures(X, Fs, nChroma, nFreqsPerChroma)
+    chromaNames = stChromaFeaturesReturns[1]
+    chromaF = stChromaFeaturesReturns[2]
+    curFV[numOfTimeSpectralFeatueres + nceps + 1 : numOfTimeSpectralFeatueres + nceps + numOfChromaFeatures] = chromaF
+    curFV[numOfTimeSpectralFeatures + nceps + numOfChromaFeatures] = std(chromaF)
+    stFeatures = c(stFeatures, curFV)
+  
+    for(i in X){
+      Xprev = c(Xprev, i)
+    }
+  }
+  
+  #stFeatures = numpy.concatenate(stFeatures, 1) #Doubt
+  return (stFeatures)
+  
+}
+
+mtFeatureExtraction <- function(signal, mtWin, mtStep, stWin, stStep) {
+  
+  Fs = signal@samp.rate
+  mtWinRatio = as.integer(round(mtWin / stStep))
+  mtStepRatio = as.integer(round(mtStep / stStep))
+  
+  mtFeatures = list()
+  
+  stFeatures = stFeatureExtraction(signal, stWin, stStep)
+  numOfFeatures = length(srFeatures)
+  numOfStatistics = 2
+  
+  for (i in 1 : numOfStatistics * numOfFeatures){
+    mtFeatures = list(mtFeatures, list())
+    
+  }
+  
+  for (i in 1:numOfFeatures){
+    curPos = 1
+    N = length(stFeatures[i])
+    while(curpos < N){
+      N1 = curPos
+      N2 = curPos + mtWinRatio
+      if (N2 > N1){
+        N2 = N
+      }
+      curStFeatures = stFeatures[i][N1:N2 + 1]
+      
+      mtFeatures[i] = list(mtFeatures[i], mean(curStFeatures))
+      mtFeatures[i + numOfFeatures] = list(mtFeatures[i + numOfFeatures], sd(curStFeatures))
+      curPos = curPos + mtStepRatio
+    }
+  }
+  return (list(mtFeatures, stFeatures))
+}
+
+stFeatureSpeed <- function(signal, Win, Step){
+  
+  Fs = signal@samp.rate
+  
+  N = length(signal)
+  curPos = 1
+  countFrames = 0
+  
+  lowfreq = 133.33
+  linsc = 200/3.
+  logsc = 1.0711703
+  nlinfil = 13
+  nlogfil = 27
+  nceps = 13
+  nfil = nlinfil + nlogfil
+  nfft = Win / 2
+  if(Fs < 8000){
+    nlogfil = 5
+    nfil = nlinfil + nlogfil
+    nfft = Win / 2
+  }
+  mfccInitFilterBanksReturns = mfccInitFilterBanks(Fs, nfft, lowfreq, linsc, logsc, nlinfil, nlogfil)
+  fbank = mfccInitFilterBanksReturns[1]
+  freqs = mfccInitFilterBanksReturns[2]
+  
+  numOfTimeSpectralFeatures = 8
+  numOfHarmonicFeatures = 1
+  totalNumOfFeatures = numOfTimeSpectralFeatures + nceps + numOfHarmonicFeatures
+  stFeatures = list()
+  
+  while (curPos + Win <= N){
+    countFrames = countFrames + 1
+    x = signal@left[curPos : curPos + Win]
+    curPos = curPos + Step
+    X = abs(fft(x))
+    X = X[1 : nfft]
+    X = X / length(X)
+    Ex = 0.0
+    E1 = 0.0
+    X[1 : 4] = 0
+    stFeatures = list(stFeatures, stHarmonic(x, Fs))
+  }
+    
+  return (stFeatures)
+}
+>>>>>>> 59e5f24b49f3e8b0d838348ca7342d9bb73502e9
+
+
+dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, computeBEAT){
+  if(missing(copmuteBEAT))
+    computeBeats = FALSE
+  
+  allMtFeatures = list()
+  processingTimes = list()
+  
+  types = list('*.wav', '*.mp3')
+  wavFilesList = list()
+  for (files in types)
+    wavFilesList.extend(Sys.glob(file.path(dirName, files)))
+  sort(wavFilesList)
+  wavFilesList = list()
+  for (i in 1 : length(wavFilesList)){
+    print(cat("Analyzing file {0:", i, "} of {1:", len(wavFilesList), "}: {2:", enc2utf8(wavFilesList[i]), "}"))
+    if (file.size(wavFilesList[i]) == 0){
+      print("\tEMPTY FILE -- SKIPPINg")
+      next
+    }
+    wavFile = readAudioFile(wavFilesList[i])
+    Fs = wavFile@samp.rate
+    
+    t1 = Sys.time()
+    wavFilesList2 = list(wavFilesList2, wavFilesList[i])
+    
+    mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
+    MidTermFeatures = mtFeatureExtractionReturns[1]
+    stFeatures = mtFeatureExtractionReturns[2]
+    if (computeBEAT){
+      beatExtractionReturns = beatExtraction(stFeatures, stStep)
+      beat = beatExtractionReturns[1]
+      beatConf = beatExtractionReturns[2]
+    }
+    
+    MidTermFeatures = colMeans(matrix(unlist(MidTermFeatures), ncol = length(stFeatures)))
+    if (!(anyNA(MidTermFeatures)) && !(any(!is.finite()))){
+      if (computeBEAT){
+        MidTermFeatures = c(MidTermFeatures, beat)
+        MidTermFeatures = c(MidTermFeatures, beatConf)
+      }
+      if (length(allMtFeatures) == 0){
+        allMtFeatures = MidTermFeatures
+      }
+      else{
+        allMtFeatures = rbind()
+      }
+    }
+    
+  }
+}
 
 
 
-
-
+  
+stHarmonic<-function(frame, fs)
+{
+  m<-c()
+  p<-c()
+  a<-c()
+  M<-round(0.016 * fs) - 1
+  print(cat("M", M))
+  R<-cor(frame, frame)
+  print(cat("R", R))
+  g<-R[length(frame)-1]
+  print(cat("g", g))
+  R<-rev(R)
+  print(cat("R", R))
+  a<-sign(R)
+  print(cat("a", a))
+  k=1
+  m[1]=a[1]
+  for (i in 2:length(a)){
+    m[i]<-a[i]-a[i-1]
+    
+  }
+  print(m)
+  
+  for (i in 1:length(m))
+  {
+    if(m[i]!=0)
+    {
+      p[k]=m[i]
+      k<-k+1
+    }
+    
+  }
+  print(p)
+  if( length(p) == 0)
+  {
+    m0 <- length(R)-1
+    
+  }
+  else
+  {
+    m0 <- p[1]
+  }
+  
+  if(  M > length(R))
+  {
+    M<-length(R) - 1
+  }
+  Gamma<-rep(0,M)
+  Csum<-cumsum(frame^2)
+  print(m0)
+  Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
+  print(cat("gamma", Gamma))
+  ZCR<-stZCR(Gamma)
+  if(ZCR>0.15)
+  {
+    HR= 0.0
+    f0<-0.0
+  }
+  
+  else
+  {
+    if( length(Gamma) == 0)
+      
+    {  HR = 1.0
+    blag<-0.0
+    Gamma<-rep(0,M)}
+    else
+    {
+      HR<-max(Gamma)
+      blag<-argmax(Gamma)
+      
+    }
+  }
+  
+  f0<-fs / (blag + eps)
+  if (f0 > 5000)
+  {
+    f0 = 0.0
+  }
+  if (HR < 0.1)
+  {
+    f0 = 0.0
+  }
+  print(cat("HR",HR))
+  print(cat("f0", f0))
+  #return(c(f0, HR))
+}
+arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
+#print(cat(arr))
+stHarmonic(arr , 10000)
 
 
 
