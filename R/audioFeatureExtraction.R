@@ -346,6 +346,57 @@ stFeatureSpeed <- function(signal, Win, Step){
 }
 
 
+dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, computeBEAT){
+  if(missing(copmuteBEAT))
+    computeBeats = FALSE
+  
+  allMtFeatures = list()
+  processingTimes = list()
+  
+  types = list('*.wav', '*.mp3')
+  wavFilesList = list()
+  for (files in types)
+    wavFilesList.extend(Sys.glob(file.path(dirName, files)))
+  sort(wavFilesList)
+  wavFilesList = list()
+  for (i in 1 : length(wavFilesList)){
+    print(cat("Analyzing file {0:", i, "} of {1:", len(wavFilesList), "}: {2:", enc2utf8(wavFilesList[i]), "}"))
+    if (file.size(wavFilesList[i]) == 0){
+      print("\tEMPTY FILE -- SKIPPINg")
+      next
+    }
+    wavFile = readAudioFile(wavFilesList[i])
+    Fs = wavFile@samp.rate
+    
+    t1 = Sys.time()
+    wavFilesList2 = list(wavFilesList2, wavFilesList[i])
+    
+    mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
+    MidTermFeatures = mtFeatureExtractionReturns[1]
+    stFeatures = mtFeatureExtractionReturns[2]
+    if (computeBEAT){
+      beatExtractionReturns = beatExtraction(stFeatures, stStep)
+      beat = beatExtractionReturns[1]
+      beatConf = beatExtractionReturns[2]
+    }
+    
+    MidTermFeatures = colMeans(matrix(unlist(MidTermFeatures), ncol = length(stFeatures)))
+    if (!(anyNA(MidTermFeatures)) && !(any(!is.finite()))){
+      if (computeBEAT){
+        MidTermFeatures = c(MidTermFeatures, beat)
+        MidTermFeatures = c(MidTermFeatures, beatConf)
+      }
+      if (length(allMtFeatures) == 0){
+        allMtFeatures = MidTermFeatures
+      }
+      else{
+        allMtFeatures = rbind()
+      }
+    }
+    
+  }
+}
+  
 
 
 
