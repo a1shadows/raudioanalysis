@@ -127,21 +127,19 @@ stChormaFeaturesInit<-function(nfft,fs)
   return(mylist)
 }
 
-
 mfccInitFilterBanks<-function(fs,nfft)
 {
+  
   
   lowfreq=133.33
   linsc=200/3
   logsc=1.0711703
   numLinFiltTotal=13
   numLogFilt<-27
-  
   if(fs<8000)
   {
     nlogfil<-5
   }
-  
   nFiltTotal = numLinFiltTotal+numLogFilt
   
   freqs = rep(0,nFiltTotal+2)
@@ -152,6 +150,7 @@ mfccInitFilterBanks<-function(fs,nfft)
   
   print(numLinFiltTotalu:l)
   freqs[numLinFiltTotal:l]<-freqs[numLinFiltTotal]*logsc
+  
   po=seq(1,numLogFilt+2)
   po
   freqs[numLinFiltTotalu:l]<-freqs[numLinFiltTotalu:l]^po
@@ -181,26 +180,18 @@ mfccInitFilterBanks<-function(fs,nfft)
   rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
   print(cat("rid", rid))
   rslope=heights[i]/(highTrFreq-cenTrFreq)
-<<<<<<< HEAD
   #print(cat("rslopeprint(cat('rid', rid))print(cat('rid', rid))", rslope))
-=======
-  #print(cat("rslope", print(cat("rid", rid))print(cat("rid", rid))", rslope))
->>>>>>> 59e5f24b49f3e8b0d838348ca7342d9bb73502e9
   fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
   fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
 }
 
 
-<<<<<<< HEAD
 
 
 fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
-=======
-#fs=1
-#nfft=5
-#mfccInitFilterBanks(fs,nfft)
+
 
 stFeatureExtraction <- function(signal, win, step){
   Fs = signal@samp.rate
