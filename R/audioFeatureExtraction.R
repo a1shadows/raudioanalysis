@@ -390,11 +390,17 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
         allMtFeatures = MidTermFeatures
       }
       else{
-        allMtFeatures = rbind()
+        allMtFeatures = rbind(allMtFeatures, MidTermFeatures)
       }
+      t2 = Sys.time()
+      duration = length(wavFile@left) / Fs
+      processingTimes = list(processingTimes, ((t2 - t1) / duration))
     }
-    
   }
+  if (length(processingTimes) > 0){
+    print (cat("Feature extraction complexity ratio: ", round(1/mean(processingTimes), digit = 1), "x realtime"))
+  }
+  return(list(allMtFeatures, wavFilesList2))
 }
   
 
