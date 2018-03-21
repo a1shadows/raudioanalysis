@@ -1,4 +1,5 @@
 library("seewave")
+
 eps = 0.00000001
 
 #frame will have to be converted into a vector
@@ -173,7 +174,7 @@ mfccInitFilterBanks<-function(fs,nfft)
   k2=floor(cenTrFreq*(nfft/fs))
   k1
   k2
-  #############################################################
+  #error in lid
   lid=seq(k1,k2)
   print(cat("lid", lid))
   lslope=heights[i]/(cenTrFreq-lowTrFreq)
@@ -181,14 +182,23 @@ mfccInitFilterBanks<-function(fs,nfft)
   rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
   print(cat("rid", rid))
   rslope=heights[i]/(highTrFreq-cenTrFreq)
+<<<<<<< HEAD
+  #print(cat("rslopeprint(cat('rid', rid))print(cat('rid', rid))", rslope))
+=======
   #print(cat("rslope", print(cat("rid", rid))print(cat("rid", rid))", rslope))
+>>>>>>> 59e5f24b49f3e8b0d838348ca7342d9bb73502e9
   fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
   fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
 }
-#print(fbank)
-#print(freqs)
 
 
+<<<<<<< HEAD
+
+
+fs=1
+nfft=5
+mfccInitFilterBanks(fs,nfft)
+=======
 #fs=1
 #nfft=5
 #mfccInitFilterBanks(fs,nfft)
@@ -344,6 +354,7 @@ stFeatureSpeed <- function(signal, Win, Step){
     
   return (stFeatures)
 }
+>>>>>>> 59e5f24b49f3e8b0d838348ca7342d9bb73502e9
 
 
 dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, computeBEAT){
@@ -402,7 +413,114 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
   }
   return(list(allMtFeatures, wavFilesList2))
 }
-  
 
+
+
+  
+stHarmonic<-function(frame, fs)
+{
+  m<-c()
+  p<-c()
+  a<-c()
+  M<-round(0.016 * fs) - 1
+  print(cat("M", M))
+  R<-cor(frame, frame)
+  print(cat("R", R))
+  g<-R[length(frame)-1]
+  print(cat("g", g))
+  R<-rev(R)
+  print(cat("R", R))
+  a<-sign(R)
+  print(cat("a", a))
+  k=1
+  m[1]=a[1]
+  for (i in 2:length(a)){
+    m[i]<-a[i]-a[i-1]
+    
+  }
+  print(m)
+  
+  for (i in 1:length(m))
+  {
+    if(m[i]!=0)
+    {
+      p[k]=m[i]
+      k<-k+1
+    }
+    
+  }
+  print(p)
+  if( length(p) == 0)
+  {
+    m0 <- length(R)-1
+    
+  }
+  else
+  {
+    m0 <- p[1]
+  }
+  
+  if(  M > length(R))
+  {
+    M<-length(R) - 1
+  }
+  Gamma<-rep(0,M)
+  Csum<-cumsum(frame^2)
+  print(m0)
+  Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
+  print(cat("gamma", Gamma))
+  ZCR<-stZCR(Gamma)
+  if(ZCR>0.15)
+  {
+    HR= 0.0
+    f0<-0.0
+  }
+  
+  else
+  {
+    if( length(Gamma) == 0)
+      
+    {  HR = 1.0
+    blag<-0.0
+    Gamma<-rep(0,M)}
+    else
+    {
+      HR<-max(Gamma)
+      blag<-argmax(Gamma)
+      
+    }
+  }
+  
+  f0<-fs / (blag + eps)
+  if (f0 > 5000)
+  {
+    f0 = 0.0
+  }
+  if (HR < 0.1)
+  {
+    f0 = 0.0
+  }
+  print(cat("HR",HR))
+  print(cat("f0", f0))
+  #return(c(f0, HR))
+}
+arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
+#print(cat(arr))
+stHarmonic(arr , 10000)
+
+
+library("dtt")
+stMFCC<-function(X, fbank, nceps)
+{
+  mspec<-log10((X %% t(fbank))+eps)
+  ceps<-dct(mspec)[1:nceps]
+  
+  return(ceps)
+}
+
+f<-c(1,2,3,4)
+p<-
+x<-3
+print(stMFCC(x,f,p))
 
 
