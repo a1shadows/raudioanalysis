@@ -193,6 +193,79 @@ fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
 
+stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
+{
+  
+  win=as.integer(Win)
+  step=as.integer(Step)
+  signal=c(as.double(signal))
+  signal=signal/(2.0 ^ 15)
+  dc=mean(signal)
+  m=abs(signal)
+  ma=max(m)
+  signal=(signal-dc)/(ma-dc)
+  n=length(signal)
+  curpos=0
+  countframes=0
+  nfft=as.integer(win/2)
+  chromagram=c()
+  #returnno=list()
+  #nChroma,nfreq
+  #returno=stChromaFeaturesInit(nfft,Fs)
+  while(curpos+win-1<n)
+  {
+    countframes=countframes+1
+    k6=curpos+win
+    x=signal[curpos:k6]
+    curpos=curpos+step
+    X=abs(fft(x,inverse=FALSE))
+    X=X[0:nfft]
+    X=X/length(X)
+    #l=list()
+    chromanames=array(c(0,50,100,150),dim=c(1,4))
+    r1=c(19,188,12,10)
+    r2=c(190,18,15,80)
+    C=array(c(r1,r2),dim=c(2,4))
+    #l=stChromaFeatures(X,Fs,nC)
+    C=C[,1]
+    C
+    if(countframes==1){
+      print("hello")
+      chromagram=t(C)
+    }else{
+      chromagram=rbind(chromagram,t(C))
+    }
+    print(chromagram)
+    FreqAxis=chromanames
+    TimeAxis=c()
+    ro=NROW(chromagram)
+    ro=ro
+    row=seq(0,ro)
+    for (t in row)
+    {
+      TimeAxis[t+1]=((t*Step)/Fs)
+      
+    }
+    
+  }
+  print(chromagram)
+  print(TimeAxis)
+  print(FreqAxis)
+  
+  ret=list(TimeAxis=TimeAxis,chromagram=chromagram,FreqAxis=FreqAxis)
+  return (ret)
+}
+signal=c(1.8,12,13.7,15.7)
+Fs=50
+Win=2
+Step=2
+ans=list()
+ans=stChromagram(signal,Fs,Win,Step)
+print(ans$TimeAxis)
+print(ans$chromagram)
+print(ans$FreqAxis)
+
+
 
 stFeatureExtraction <- function(signal, win, step){
   Fs = signal@samp.rate
@@ -507,5 +580,11 @@ f<-c(1,2,3,4)
 p<-
 x<-3
 print(stMFCC(x,f,p))
-
-
+x=c(1,2,6,7)
+y=c(8,90,13,11)
+v<-ccf(x,y,type=c("correlation"))
+v
+m2<-rcorr(x,y)
+m2
+mk=solve(x)
+mk
