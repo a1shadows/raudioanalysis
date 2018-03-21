@@ -192,6 +192,49 @@ mfccInitFilterBanks<-function(fs,nfft)
 fs=1
 nfft=5
 mfccInitFilterBanks(fs,nfft)
+stChromaFeaturesInit<-function(nfft, fs)
+{
+  
+  m=seq(0,nfft-1)
+  freqs=c()
+  o=1
+  for (f in m)
+  {
+    print(f)
+    val=(f+1)*fs/(2*nfft)
+    freqs[o]=val
+    o=o+1
+    print(o)
+  }
+  
+  Cp = 27.50 
+  idx=c()
+  m1=log2(freqs/Cp)
+  nChroma=round(12.0*m1)
+  rcount=NROW(nChroma)
+  nFreqsPerChroma=matrix(0,1,rcount)
+  uChroma=unique(nChroma)
+  
+  for (u in uChroma)
+  {
+    idx=which(u==nChroma,arr.ind=TRUE)
+    b=NROW(idx)
+    b=as.numeric(b)
+    nFreqsPerChroma[idx]=b
+    
+  }
+  
+  returnlist=list(nChroma=nChroma,nFreqsPerChroma=nFreqsPerChroma)
+  return (returnlist)
+}
+retu=list()
+nfft=30
+fs=15
+retu=stChromaFeaturesInit(nfft,fs)
+print(retu$nChroma)
+print(retu$nFreqsPerChroma)
+
+
 
 stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
 {
@@ -255,10 +298,7 @@ stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
   ret=list(TimeAxis=TimeAxis,chromagram=chromagram,FreqAxis=FreqAxis)
   return (ret)
 }
-signal=c(1.8,12,13.7,15.7)
-Fs=50
-Win=2
-Step=2
+
 ans=list()
 ans=stChromagram(signal,Fs,Win,Step)
 print(ans$TimeAxis)
@@ -580,11 +620,3 @@ f<-c(1,2,3,4)
 p<-
 x<-3
 print(stMFCC(x,f,p))
-x=c(1,2,6,7)
-y=c(8,90,13,11)
-v<-ccf(x,y,type=c("correlation"))
-v
-m2<-rcorr(x,y)
-m2
-mk=solve(x)
-mk
