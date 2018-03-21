@@ -620,3 +620,28 @@ f<-c(1,2,3,4)
 p<-
 x<-3
 print(stMFCC(x,f,p))
+
+
+
+library(signal)
+phormants<-function(x,Fs)
+{ w=c()
+Fs=10
+x=c(18,19,100,15,11,1)
+N1=length(x)
+N=seq(0,N1-1)
+i=1
+for (j in N)
+{
+  print(j)
+  tri=cos((2*3.14*j)/(N1-1))
+  w[i]=0.54-0.46*tri
+  i=i+1
+}
+x1=x*w
+x1=decimate(x1,1,1.0:0.63, ftype = "iir")
+ncoeff=2+Fs/1000
+
+}
+
+
