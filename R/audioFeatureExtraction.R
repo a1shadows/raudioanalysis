@@ -522,9 +522,7 @@ library("shape")
 stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
 {
   chromaNames<-list('A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#')
-  spec<-X^2 
-  print(max(nChroma))
-  print(ncol(nChroma))
+  spec<-X^2
   if (max(nChroma)<length(nChroma))
   {
     l<-NROW(nChroma)
@@ -536,12 +534,13 @@ stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
   }
   else
   {
-    which(nChroma>length(nchroma))
-    I<-(nChroma>length(nchroma))[0][0] 
+    s<-which(nChroma>length(nChroma))
+    I<-s
+    print ("I")
+    print(I)
   #convert in r #see in main document
     l<-NROW(nChroma)
-    print(l)
-    print(nChroma)
+   
     C=matrix(0,l,1)
                 #convert in r # see in main document
     C[nChroma[1:I]]<-spec   
