@@ -645,5 +645,137 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     }
     
   }
+<<<<<<< HEAD
+  print(p)
+  if( length(p) == 0)
+  {
+    m0 <- length(R)-1
+    
+  }
+  else
+  {
+    m0 <- p[1]
+  }
+  
+  if(  M > length(R))
+  {
+    M<-length(R) - 1
+  }
+  Gamma<-rep(0,M)
+  Csum<-cumsum(frame^2)
+  print(m0)
+  Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
+  print(cat("gamma", Gamma))
+  ZCR<-stZCR(Gamma)
+  if(ZCR>0.15)
+  {
+    HR= 0.0
+    f0<-0.0
+  }
+  
+  else
+  {
+    if( length(Gamma) == 0)
+      
+    {  HR = 1.0
+    blag<-0.0
+    Gamma<-rep(0,M)}
+    else
+    {
+      HR<-max(Gamma)
+      blag<-argmax(Gamma)
+      
+    }
+  }
+  
+  f0<-fs / (blag + eps)
+  if (f0 > 5000)
+  {
+    f0 = 0.0
+  }
+  if (HR < 0.1)
+  {
+    f0 = 0.0
+  }
+  print(cat("HR",HR))
+  print(cat("f0", f0))
+  #return(c(f0, HR))
+}
+arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
+#print(cat(arr))
+stHarmonic(arr , 10000)
+
+
+library("dtt")
+stMFCC<-function(X, fbank, nceps)
+{
+  mspec<-log10((X %% t(fbank))+eps)
+  ceps<-dct(mspec)[1:nceps]
+  
+  return(ceps)
+}
+
+f<-c(1,2,3,4)
+p<-
+x<-3
+print(stMFCC(x,f,p))
+
+
+library("shape")
+stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
+{
+  chromaNames<-list('A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#')
+  spec<-X^2
+  if (max(nChroma)<length(nChroma))
+  {
+    l<-NROW(nChroma)
+    print(l)
+    print(nChroma)
+    C=matrix(0,l,1) #C = numpy.zeros((nChroma.shape[0],)) convert in r
+    C[nChroma]<- spec
+    C<-C/ nFreqsPerChroma[nChroma]
+  }
+  else
+  {
+    s<-which(nChroma>length(nChroma))
+    I<-s
+    print ("I")
+    print(I)
+  #convert in r #see in main document
+    l<-NROW(nChroma)
+   
+    C=matrix(0,l,1)
+                #convert in r # see in main document
+    C[nChroma[1:I]]<-spec   
+    C<-C/ nFreqsPerChroma[nChroma]
+  }
+  
+  finalC<-zeros(12, 1)
+  newD<-as.integer(ceil(length(C) / 12.0) * 12)
+  g<-NROW(newD)
+  C2=matrix(0,g,1)
+ 
+  
+  C2<-reshape(length(C2)/12, 12) #confirm this line
+  finalC<-t(matrix(sum(C2))) #confirm this line
+  finalC<-finalC/sum(spec)
+  a<-list(chromaNames, finalC)
+  
+  return (a)
+  
+}
+
+
+X<-10
+fs<-c(1,2,3,4,4,5,55)
+nChroma<-c(3,4,27,5,68,980)
+nFreqsPerChroma<-c(45,23,3,44,5,2,4)
+
+print(stChromaFeatures(X, fs, nChroma, nFreqsPerChroma))
+
+
+
+=======
   return(list(features, classNames, fileNames))
 }
+>>>>>>> 4e66eeb7d21c1044e96da747944c6c8ebba0421c
