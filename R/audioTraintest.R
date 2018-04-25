@@ -165,8 +165,44 @@ for (f in features)
 
   features = features2
   bestParam = evaluateClassifier(features, classNames, 100, classifierType, classifierParams, 0, perTrain)
-
+  #write the above function
+  
+  print ("Selected params :")
+  print(format(round(bestParam, 4)))
+  C = length(classNames)
+  
+  #give ouput in normalize features as a list
+  w= normalizeFeatures(features)# normalize features function to be written
+  featuresNorm=w[1]
+  
+  MEAN = as.list(w[2])
+  STD =as.list(w[3])
+  featuresNew = featuresNorm
+  
+  #give ouput in listOfFeatures2Matrix as a list
+  q=listOfFeatures2Matrix(featuresNew)
+  X=as.list(q[1])
+  Y=as.list(q[2])
+  
   
 }
 
 
+#this must part left to code
+if classifierType == "knn":
+  [X, Y] = listOfFeatures2Matrix(featuresNew)
+X = X.tolist()
+Y = Y.tolist()
+fo = open(modelName, "wb")
+cPickle.dump(X, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(Y,  fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(MEAN, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(STD,  fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(classNames,  fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(bestParam,  fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(mtWin, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(mtStep, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(stWin, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(stStep, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+cPickle.dump(computeBEAT, fo, protocol=cPickle.HIGHEST_PROTOCOL)
+fo.close()
