@@ -24,10 +24,12 @@ stEnergy<-function(frame)
 
 
 
-stEnergyEntropy<-function(frame)
+stEnergyEntropy<-function(frame, numOfShortBlocks)
 {
   eps = 0.00000001
-  numOfShortBlocks<-10
+  if (missing(numOfShortBlocks)){
+    numOfShortBlocks<-10
+  }
   Eol<-sum(frame^2)   
   L<-length(frame)
   subWinLength<-as.integer(floor(L/numOfShortBlocks))
@@ -72,16 +74,18 @@ stSpectralCentroidAndSpread<-function(X,fs)
 
 
 
-stEnergyEntropy<-function(X)
+stSpectralEntropy<-function(X, numOfShortBlocks)
 {
-  numOfShortBlocks<-10
+  if(missing(numOfShortBlocks)){
+    numOfShortBlocks<-10
+  }
+  
   Eol<-sum(X^2)   
   L<-length(X)
   subWinLength<-as.integer(floor(L/numOfShortBlocks))
   if(L!= (subWinLength * numOfShortBlocks))
   {
     X<- X[1: subWinLength * numOfShortBlocks + 1]
-    
     
     
   }
@@ -102,6 +106,20 @@ stSpectralFlux<-function(X,Xprev)
 }
 
 
+stSpectralRollOff <- function(X, c, fs){
+  totalEnergy = sum(X ** 2) + eps
+  fftlength = length(X)
+  Thres = c*totalEnergy
+  CumSum = cumsum(X ** 2) + eps
+  a = which(CumSum > Thres)
+  if(length(a) > 0){
+    mC = a[1] / fftlength
+  }
+  else{
+    mC = 0.0
+  }
+  return (mC)
+}
 
 stHarmonic<-function(frame, fs)
 {
@@ -194,110 +212,7 @@ arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
 #print(cat(arr))
 stHarmonic(arr , 10000)
 
-
-library("dtt")
-stMFCC<-function(X, fbank, nceps)
-{
-  mspec<-log10((X %% t(fbank))+eps)
-  ceps<-dct(mspec)[1:nceps]
-  
-  return(ceps)
-}
-
-f<-c(1,2,3,4)
-p<-
-  x<-3
-print(stMFCC(x,f,p))
-
-
-
-library(signal)
-phormants<-function(x,Fs)
-{ w=c()
-Fs=10
-x=c(18,19,100,15,11,1)
-N1=length(x)
-N=seq(0,N1-1)
-i=1
-for (j in N)
-{
-  print(j)
-  tri=cos((2*3.14*j)/(N1-1))
-  w[i]=0.54-0.46*tri
-  i=i+1
-}
-x1=x*w
-x1=decimate(x1,1,1.0:0.63, ftype = "iir")
-ncoeff=2+Fs/1000
-
-}
-
-
-mfccInitFilterBanks<-function(fs,nfft)
-{
-  
-  lowfreq=133.33
-  linsc=200/3
-  logsc=1.0711703
-  numLinFiltTotal=13
-  numLogFilt<-27
-  
-  if(fs<8000)
-  {
-    nlogfil<-5
-  }
-  
-  nFiltTotal = numLinFiltTotal+numLogFilt
-  
-  freqs = rep(0,nFiltTotal+2)
-  
-  l=length(freqs)
-  numLinFiltTotalu=numLinFiltTotal+1
-  freqs[1:numLinFiltTotal]<-lowfreq+(seq(numLinFiltTotal)*linsc)
-  
-  print(numLinFiltTotalu:l)
-  freqs[numLinFiltTotal:l]<-freqs[numLinFiltTotal]*logsc
-  po=seq(1,numLogFilt+2)
-  po
-  freqs[numLinFiltTotalu:l]<-freqs[numLinFiltTotalu:l]^po
-  m=l-1
-  heights<-2.0/(freqs[2:l]-freqs[1:m])
-  fbank<-matrix(0,nFiltTotal,nfft)
-  m1=nfft-1
-  nfreqs<-seq(m1)/(1.0*nfft)*fs
-  nfreqs
-  m2=nFiltTotal-1
-  for (i in seq(1:m2))
-  {
-    lowTrFreq=freqs[i]
-    cenTrFreq=freqs[i+1]
-    highTrFreq=freqs[i+2]
-  }
-  
-  k1=floor(lowTrFreq*(nfft/fs))+1
-  k2=floor(cenTrFreq*(nfft/fs))
-  k1
-  k2
-  #############################################################
-  lid=seq(k1,k2)
-  print(cat("lid", lid))
-  lslope=heights[i]/(cenTrFreq-lowTrFreq)
-  print(cat("lslope", lslope))
-  rid=seq(floor(cenTrFreq*nfft/fs)+1,floor(highTrFreq*nfft/fs))
-  print(cat("rid", rid))
-  rslope=heights[i]/(highTrFreq-cenTrFreq)
-  #print(cat("rslope", print(cat("rid", rid))print(cat("rid", rid))", rslope))
-  fbank[i][lid]=lslope*(nfreqs[lid]-lowTrFreq)
-  fbank[i][rid]=rslope*(highTrFreq-nfreqs[rid])
-}
-#print(fbank)
-#print(freqs)
-
-
-#fs=1
-#nfft=5
-#mfccInitFilterBanks(fs,nfft)
-
+#MFCC will be called from tineR
 
 stChormaFeaturesInit<-function(nfft,fs)
 {
@@ -325,6 +240,35 @@ stChormaFeaturesInit<-function(nfft,fs)
   mylist<-list(val1=nChroma,val2=nFreqsPerChroma)
   
   return(mylist)
+}
+
+stChromaFeatures <- function(X, fs, nChroma, nFreqsPerChroma){
+  
+  chromaNames = c('A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#')  
+  spec = X ** 2
+  
+  if (max(nChroma) < length(nChroma)){
+    C = rep(0, length(nChroma))
+    C[nChroma + 1] = spec
+    C  = C / nFreqsPerChroma 
+  }
+  
+  else{
+    I = which(nChroma > length(nChroma))[1]
+    C = rep(0, length(nChroma))
+    C[nChroma[1:I - 1]] = spec
+    C = C / nFreqsPerChroma
+    
+  }
+  
+  finalC = matrix(rep(0, 12), nrow = 12, ncol = 1)
+  newD = ceiling(length(C) / 12) * 12
+  C2 = rep(0, newD)
+  C2[1:length(C)] = C
+  C2 = matrix(C2, nrow = length(C2) / 12, ncol = 12)
+  finalC = t(rowSums(C2))
+  finalC = finalC / sum(spec)
+  return(list(chromaNames, finalC))
 }
 
 stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
@@ -397,6 +341,38 @@ print(ans$chromagram)
 print(ans$FreqAxis)
 
 
+library(signal)
+phormants<-function(x,Fs)
+{ 
+  w=c()
+  Fs=10
+  x=c(18,19,100,15,11,1)
+  N1=length(x)
+  N=seq(0,N1-1)
+  i=1
+  for (j in N)
+  {
+    print(j)
+    tri=cos((2*3.14*j)/(N1-1))
+    w[i]=0.54-0.46*tri
+    i=i+1
+  }
+  x1=x*w
+  x1=decimate(x1,1,1.0:0.63, ftype = "iir")
+  ncoeff=2+Fs/1000
+  
+}
+
+beatExtraction <- function(){
+  
+  
+}
+
+stSpectogram <- function(){
+  
+  
+}
+
 stFeatureExtraction <- function(signal, win, step){
   Fs = signal@samp.rate
   Win = as.integer(win)
@@ -456,7 +432,7 @@ stFeatureExtraction <- function(signal, win, step){
     curFV[numOfTimeSpectralFeatueres + nceps + 1 : numOfTimeSpectralFeatueres + nceps + numOfChromaFeatures] = chromaF
     curFV[numOfTimeSpectralFeatures + nceps + numOfChromaFeatures] = std(chromaF)
     stFeatures = c(stFeatures, curFV)
-  
+    
     for(i in X){
       Xprev = c(Xprev, i)
     }
@@ -545,7 +521,7 @@ stFeatureSpeed <- function(signal, Win, Step){
     X[1 : 4] = 0
     stFeatures = list(stFeatures, stHarmonic(x, Fs))
   }
-    
+  
   return (stFeatures)
 }
 
@@ -591,7 +567,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     else{
       mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
       MidTermFeatures = mtFeatureExtractionReturns[1]
-    
+      
     }
     MidTermFeatures = t(MidTermFeatures)
     MidTermFeatures = rowMeans(MidTermFeatures)
@@ -645,7 +621,7 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     }
     
   }
-<<<<<<< HEAD
+  <<<<<<< HEAD
   print(p)
   if( length(p) == 0)
   {
@@ -717,7 +693,7 @@ stMFCC<-function(X, fbank, nceps)
 
 f<-c(1,2,3,4)
 p<-
-x<-3
+  x<-3
 print(stMFCC(x,f,p))
 
 
@@ -741,11 +717,11 @@ stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
     I<-s
     print ("I")
     print(I)
-  #convert in r #see in main document
+    #convert in r #see in main document
     l<-NROW(nChroma)
-   
+    
     C=matrix(0,l,1)
-                #convert in r # see in main document
+    #convert in r # see in main document
     C[nChroma[1:I]]<-spec   
     C<-C/ nFreqsPerChroma[nChroma]
   }
@@ -754,7 +730,7 @@ stChromaFeatures<-function(X, fs, nChroma, nFreqsPerChroma)
   newD<-as.integer(ceil(length(C) / 12.0) * 12)
   g<-NROW(newD)
   C2=matrix(0,g,1)
- 
+  
   
   C2<-reshape(length(C2)/12, 12) #confirm this line
   finalC<-t(matrix(sum(C2))) #confirm this line
@@ -778,4 +754,19 @@ print(stChromaFeatures(X, fs, nChroma, nFreqsPerChroma))
 =======
   return(list(features, classNames, fileNames))
 }
->>>>>>> 4e66eeb7d21c1044e96da747944c6c8ebba0421c
+<<<<<<< HEAD
+
+mtFeatureExtractionToFile <- function(){
+  
+  
+}
+
+mtFeatureExtractionToFileDir <- function(){
+  
+  
+}
+
+#USE SPECTPROP TO ADD MORE PROPERTIES
+=======
+  >>>>>>> 4e66eeb7d21c1044e96da747944c6c8ebba0421c
+>>>>>>> 7845d9c83c6db277350fdce3cdd532a8a6265e75
