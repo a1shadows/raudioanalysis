@@ -363,15 +363,7 @@ phormants<-function(x,Fs)
   
 }
 
-beatExtraction <- function(){
-  
-  
-}
-
-stSpectogram <- function(){
-  
-  
-}
+#Add spectogram and beatextraction
 
 stFeatureExtraction <- function(signal, win, step){
   Fs = signal@samp.rate
@@ -557,12 +549,12 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     wavFilesList2 = list(wavFilesList2, wavFilesList[i])
     
     if (computeBEAT){
-      mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
-      MidTermFeatures = mtFeatureExtractionReturns[1]
-      stFeatures = mtFeatureExtractionReturns[2]
-      beatExtractionReturns = beatExtraction(stFeatures, stStep)
-      beat = beatExtractionReturns[1]
-      beatConf = beatExtractionReturns[2]
+      #mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
+      #MidTermFeatures = mtFeatureExtractionReturns[1]
+      #stFeatures = mtFeatureExtractionReturns[2]
+      #beatExtractionReturns = beatExtraction(stFeatures, stStep)
+      #beat = beatExtractionReturns[1]
+      #beatConf = beatExtractionReturns[2]
     }
     else{
       mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
@@ -624,14 +616,5 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   return(list(features, classNames, fileNames))
 }
 
-mtFeatureExtractionToFile <- function(){
-  
-  
-}
-
-mtFeatureExtractionToFileDir <- function(){
-  
-  
-}
 
 #USE SPECTPROP TO ADD MORE PROPERTIES
