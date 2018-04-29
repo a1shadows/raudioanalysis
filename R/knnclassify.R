@@ -27,7 +27,7 @@ classify<-function(X,Y,k,testSample)
     print(P[i])
   }
   maxarg=which.max(P)
-  l=list()
+  l=list(maxarg=maxarg,P=P)
   l$maxarg=maxarg
   l$P=P
   return (l)
@@ -47,7 +47,7 @@ v1 <- c(1,2,3)
 #v2 <- c(100,110,120,130,140,150)
 k=2
 testSample<- array(c(v1),dim = c(1,3))
-ret=list(maxarg=maxarg,P=P)
+ret=list()
 ret=classify(X,Y,k,testSample)
 print(ret$maxarg)
 print(ret$P)
