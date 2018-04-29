@@ -5,17 +5,20 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
 {
   k=list()
   k=dirsWavFeatureExtraction(listOfDirs, mtWin, mtStep, stWin, stStep, computeBEAT=computeBEAT)
-  if(length(k$features)==0)
+  classNames=k[[2]]
+  features=k[[1]]
+  print(k[[1]])
+  if(length(features)==0)
   {
     print ("trainSVM_feature ERROR: No data found in any input folder!")
   }
-  numOfFeatures=NCOL(k$features)
+  numOfFeatures=NCOL(features)
   featureNames<-c()
   for (i in 1:numOfFeatures)
   {
-    featureNames[i]=paste(" features",i)
+    featureNames[i]=paste("features",i)
   }
-  writeTrainDataToARFF(modelName, features, classNames, featureNames)
+  writeTrainDataToARFF(modelName,k[[1]], classNames, featureNames)
   #write this function
   x<-c(lapply(features,length))
   for (i in 1:length(x))
@@ -54,9 +57,12 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
       }
     }
   }
-  
-  features = features2
-  bestParam = evaluateClassifier(features, classNames, 100, classifierType, classifierParams, 0, perTrain)
+ 
+  #features = features2
+  #print(features)
+  #print("FEATURES 2:")
+  #print(features)
+  bestParam = evaluateClassifier(k[[1]], classNames, 100, classifierType, classifierParams, 0)
   #write the above function
   
   print ("Selected params :")
@@ -120,7 +126,7 @@ writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
       
     }
     
-    cat(paste(classNames[c]), file=p, append=TRUE, sep = "\n")
+    cat(paste(classNames[c]), file=x, append=TRUE, sep = "\n")
     c=c+1
   }
   
@@ -298,6 +304,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   # ClassNames=c('abc','bcd','pqr')
   # features=list(x,z,w)
   returnnormalizefeatures=list()
+  print(features)
   returnnormalizefeatures=normalizeFeatures(features)
   featuresNorm=returnnormalizefeatures$featuresNorm
   nClasses=length(features)
@@ -447,8 +454,9 @@ normalizeFeatures<-function(features)
 {
   X=array()
   i=1
-  for (f in features)
+  for (i in seq(1,NCOL(features)))
   {
+    f=features[1:NROW(features),i]
     if(NROW(f)>0)
     {
       if(i==1)
@@ -457,29 +465,30 @@ normalizeFeatures<-function(features)
       }
       else
       {
-        lengthofstack=NROW(X)+NROW(f)
-        print(lengthofstack)
-        print(f)
+        
         X=rbind(X,f)
         print(X)
       }
       i=i+1
     }
   }
+  #print("value of X is:")
+  #print(X)
   MEAN=colMeans(X, na.rm = FALSE, dims = 1)+0.00000000000001
   STD=apply(X,2,sd)+0.00000000000001
   featuresNorm=list()
-  for (f in features)
+  o=1
+  for (i in seq(1,NCOL(features)))
   {
+    f=features[1:NROW(features),i]
     
     ft=f
-    for (nSamples in seq(1,NROW(f)))
-    {
+    print("ft is")
+    print(ft)
+    ft[o,1:NCOL(ft)]=(trunc((ft[o,1:NCOL(ft)]-MEAN)/STD))
       
-      ft[nSamples,seq(1,NCOL(ft))]=(trunc((ft[nSamples,seq(1,NCOL(ft))]-MEAN)/STD))
-      
-    }
     featuresNorm=list(featuresNorm,ft)
+    o=o+1
   }
   returnnormalizeFeatures=list(featuresNorm=featuresNorm,MEAN=MEAN,STD=STD)
   return (returnnormalizeFeatures)
