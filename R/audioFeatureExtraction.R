@@ -666,9 +666,9 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   if (missing(computeBEAT)){
     computeBEAT = FALSE
   }
-  features = list()
-  classNames = list()
-  fileNames = list()
+  features = c()
+  classNames = c()
+  fileNames = c()
   for(i in 1:length(dirNames)){
     d = dirNames[i]
     #print(cat("dirname", d))
@@ -676,15 +676,16 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     f = dirWavFeatureExtractionReturns[[1]]
     fn = dirWavFeatureExtractionReturns[[2]]
     if(dim(f) > 0){
-      features = list(features, f)
-      fileNames = list(fileNames, fn)
+      features = c(features, f)
+      fileNames = c(fileNames, fn)
       if (d[length(d)] == .Platform$file.sep){
         x = strsplit(d, .Platform$file.sep)
-        classNames = list(classNames, x[length(x) - 1])
+        classNames = c(classNames, x[[1]][length(x)])
       }
       else{
         x = strsplit(d, .Platform$file.sep)
-        classNames = list(classNames, x[length(x)])
+        #print(x[[1]][length(x) + 1])
+        classNames = c(classNames, x[[1]][length(x) + 1])
       }
     }
     
@@ -695,5 +696,6 @@ shortTermWindow = 0.050
 shortTermStep = 0.050
 eps = 0.00000001
 
+a = dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep)
 #traceback(dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep))
 #USE SPECTPROP TO ADD MORE PROPERTIES
