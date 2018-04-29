@@ -30,7 +30,7 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName, c
   #features=list('a'=c(1,2,3,4),'b'=c(3,4,5,6,6,7),'c'=c(4,2,7,5,9,8,0,0,2))
   features2<-list()
   for (f in features)
-    {
+  {
     fTemp=list()
     for(i in 1:length(features))
     {
@@ -97,7 +97,7 @@ writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
   x<-paste(modelName,".arff")
   cat(paste('@RELATION ', modelName), file=x, append=TRUE, sep = "\n")
   
- 
+  
   for (fn in featureNames)
   {
     cat(paste('@ATTRIBUTE ', fn ,' NUMERIC'), file=x, append=TRUE, sep = "\n")
@@ -115,7 +115,7 @@ writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
     for (j in i)
     {
       cat(paste(as.numeric(round(j, 6))), file=x, append=TRUE, sep = "\n")
-    
+      
     }
     
     cat(paste(classNames[c]), file=p, append=TRUE, sep = "\n")
@@ -128,22 +128,20 @@ writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
 loadKNNModel<-function(kNNModelName, isRegression=False)
 {
   load(file=kNNModelNAme)
-   print(X)  
-   print(Y) 
-   print(MEAN) 
-   print(STD) 
-   print(classNames) 
-   print(mtWin) 
-   print(mtStep) 
-   print(stWin) 
-   print(stStep) 
-   #PROBLEM WITH K
-   X = as.array(X)
-   Y = as.array(Y)
-   MEAN = as.array(MEAN)
-   STD = as.array(STD)
-   p<-list(X=X,Y=Y, MEAN=MEAN, STD=STD, classNames=classNames, mtWin=mtWin, mtStep=mtStep, stWin=stWin, stStep=stStep)
-   return (p)
-}
-   
+  print(X)  
+  print(Y) 
+  print(MEAN) 
+  print(STD) 
+  print(classNames) 
+  print(mtWin) 
+  print(mtStep) 
+  print(stWin) 
+  print(stStep) 
+  #PROBLEM WITH K
+  X = as.array(X)
+  Y = as.array(Y)
+  MEAN = as.array(MEAN)
+  STD = as.array(STD)
+  p<-list(X=X,Y=Y, MEAN=MEAN, STD=STD, classNames=classNames, mtWin=mtWin, mtStep=mtStep, stWin=stWin, stStep=stStep)
+  return (p)
 }
