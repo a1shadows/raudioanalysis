@@ -1,28 +1,50 @@
-classifierWrapper<-function(X,Y,k,testSample)
+library(pdist)
+classify<-function(X,Y,k,testSample)
 {
-  R=-1
-  P=-1
-  retclassifierWrapper=list(R=maxarg,P=P)
-  retclassifierWrapper=classify(X,Y,k,testSample)
   
-  return (retclassifierWrapper)
-}
-
-trainKNN<-function(features,k)
-{
-  X=-1
-  Y=-1
-  l=list(X=X,Y=Y)
-  l=listofFeatures2Matrix(features)
+  nClasses1=unique(Y)
+  nClasses=NROW(nClasses1)
+  i=NCOL(testSample)
+  n=nrow(X)
+  m=nrow(Y)
+  Yi=matrix(testSample,nrow=1,ncol=i)
+  Ydist <- pdist(X, Yi)
+  Ydist=as.matrix(Ydist)
+  
+  
+  iSort=order(Ydist)
+  iSort
+  P=matrix(0,nClasses,1)
+  P
+  y=iSort
+  for(i in seq(1,nClasses))
+  {
+    print(Y[1:k,y])
+    z=which(Y[1:k,y]==i,arr.ind=T)
+    print(z)
+    z1=NCOL(z)
+    P[i]=z1/k
+    print(P[i])
+  }
+  maxarg=which.max(P)
+  l=list(maxarg=maxarg,P=P)
   return (l)
   
 }
 
-
+classifierWrapper<-function(X,Y,k,testSample)
+{
+  maxarg=-1
+  P=-1
+  retclassifierWrapper=list()
+  retclassifierWrapper=classify(X,Y,k,testSample)
+  
+  return (retclassifierWrapper)
+}
 listOfFeatures2Matrix<-function(features)
 {
- 
-  X=list()
+  
+  X=c()
   Y=c()
   i=0
   for (f in features)
@@ -30,31 +52,39 @@ listOfFeatures2Matrix<-function(features)
     if(i==0)
     {
       X=f
-      Y=c(Y,i*matrix(1,NROW(f),1))
+      Y=rbind(Y,i*matrix(1,NROW(f),1))
     }
     else
     {
       print("hello")
-      X=list(X,f)
-      #print(X)
-      #X=t(X)
-      #print(X)
+      X=rbind(X,f)
       Y=c(Y,i*matrix(1,NROW(f),1))
-      Y=t(Y)
     }
     i=i+1
   }
   
-    returnlistOfFeatures2Matrix=list(X=X,Y=Y)
-    return (returnlistOfFeatures2Matrix)
-  }
-    
+  returnlistOfFeatures2Matrix=list(X=X,Y=Y)
+  return (returnlistOfFeatures2Matrix)
+}
+
+trainKNN<-function(features,k)
+{
+  X=-1
+  Y=-1
+  l=list()
+  l=listOfFeatures2Matrix(features)
+  return (l)
+  
+}
+
+
+
 
 x=matrix(c(1,2,3,4,5,6),ncol=2)
 z=matrix(c(11,12,13,14,15,16),ncol=2)
 w=matrix(c(21,22,23,24,25,26),ncol=2)
 features=list(x,z,w)
-returnlistOfFeatures2Matrix=list(X=X,Y=Y)
+returnlistOfFeatures2Matrix=list()
 returnlistOfFeatures2Matrix=listOfFeatures2Matrix(features)
 print(returnlistOfFeatures2Matrix$X)
 print(returnlistOfFeatures2Matrix$Y)
@@ -62,9 +92,13 @@ print(returnlistOfFeatures2Matrix$Y)
 
 randSplitFeatures<-function(features,partTrain)
 {
-  
+  x=matrix(c(-1,-1,-1,-1,-1,-1),ncol=2)
+  z=matrix(c(0,0,0,0,0,0),ncol=2)
+  w=matrix(c(1,1,1,1,1,1),ncol=2)
+  features=list(x,z,w)
   featuresTrain=list()
   featuresTest=list()
+  partTrain=0.60
   for (f in features)
     {
     numOfSamples=NROW(f)
@@ -106,13 +140,17 @@ print(returnofrandSplitFeatures$featuresTest)
 evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTrain=0.90)
 {
   #check return tye variables in list
-  #returnnormalizefeatures=list(featuresNorm=featuresNorm,meanreturn=meanreturn,stdreturn=stdreturn)=normalizeFeatures(features)
+  perTrain=0.60
+  parameterMode=0
   x=matrix(c(1,2,3,4,5,6),ncol=2)
   z=matrix(c(11,12,13,14,15,16),ncol=2)
   w=matrix(c(21,22,23,24,25,26),ncol=2)
   Params =c(1, 3, 5, 7, 9, 11, 13, 15)  
   ClassNames=c("abc","bcd","pqr")
   features=list(x,z,w)
+  returnnormalizefeatures=list()
+  returnnormalizefeatures=normalizeFeatures(features)
+  featuresNorm=returnnormalizefeatures$featuresNorm
   nClasses=length(features)
   CALL=c()
   acALL=c()
@@ -123,7 +161,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   F1ClassesAll=c()
   CMsAll=c()
   nSampleTotal=0
-  nExp=20
+  nExp=100
   for (f in features)
     {
     nSampleTotal=nSampleTotal+NROW(f)
@@ -143,21 +181,58 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
     CM=matrix(0,nClasses,nClasses)
     for (e in seq(1,nExp))
     { #print "Param = {0:.5f} - Classifier Evaluation Experiment {1:d} of {2:d}".format(C, e+1, nExp)
-      retournofrandSplitFeatures=list(featuresTrain=featuresTrain,featuresTest=featuresTest)
-      returnofrandSplitFeatures=randSplitFeatures(featuresNorm,perTrain)
-      returnlistOfFeatures2Matrix=list(X=X,Y=Y)
+      #retournofrandSplitFeatures=list(featuresTrain=featuresTrain,featuresTest=featuresTest)
+      #returnofrandSplitFeatures=randSplitFeatures(featuresNorm,perTrain)
+      """for (f in featuresNorm)
+      {
+        print(f)
+        numOfSamples=NROW(f)
+        numOfDims=NCOL(f)
+        b=seq(1,numOfSamples)
+        randperm=sample(b,length(b),replace=FALSE)
+        nTrainSamples=round(partTrain*numOfSamples)
+        k1=c()
+        k1=randperm[1:nTrainSamples]
+        i1=c()
+        print(f)
+        i1=f[k1,1:numOfDims]
+        featuresTrain=list(featuresTrain,i1)
+        updatednTrainSamples=nTrainSamples+1
+        k2=c()
+        randpermlen=length(randperm)
+        k2=randperm[updatednTrainSamples:randpermlen]
+        i2=c()
+        i2=f[k2,1:numOfDims]
+        featuresTest=list(featuresTest,i2)
+      }
+"""
+      featuresTrain=list()
+      x1=matrix(c(-1,-1,-1,-1),ncol=2)
+      z1=matrix(c(0,0,0,0),ncol=2)
+      w1=matrix(c(1,1,1,1),ncol=2)
+      featuresTrain=list(x1,z1,w1)
+      returnlistOfFeatures2Matrix=list()
       returnlistOfFeatures2Matrix=trainKNN(featuresTrain,C)
+      x2=matrix(c(-1,-1,-1,-1),ncol=2)
+      z2=matrix(c(0,0,0,0),ncol=2)
+      w2=matrix(c(1,1,1,1),ncol=2)
+      featuresTest=list(x2,z2,w2)
       CMt=matrix(0,nClasses,nClasses)
       for (c1 in seq(1,nClasses))
       {
-        nTestSamples=NROW(featuresTest[c1])#check NROW or length
+        nTestSamples=NROW(featuresTest[[c1]])#check NROW or length
         Results=matrix(0,nTestSamples,1)
         retclassifierWrapper=list()
-        retclassifierWrapper=list(R=maxarg,P=P)
+      
         for (ss in seq(1,nTestSamples))
         {
-          retclassifierWrapper=classifierWrapper(returnlistOfFeatures2Matrix$X,returnlistOfFeatures2Matrix$y,C,features[c1,ss])
-          Results[ss]=retclassifierWrapper$R
+          
+          featurestosend=features[[c1]]
+          print(featurestosend)
+          featurestosend1=featurestosend[ss,1:NCOL(featurestosend)]
+          print(featurestosend1)
+          retclassifierWrapper=classifierWrapper(returnlistOfFeatures2Matrix$X,returnlistOfFeatures2Matrix$y,C,featurestosend1)
+          Results[ss]=retclassifierWrapper$maxarg
         }
         for (c2 in seq(1,nClasses))
         {
@@ -226,14 +301,10 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
     }
     if(parameterMode==0)
     {
-      print("Confusion Matrix:")
-      printConfusionMatrix(CMsAll[bestAcInd],ClassNames)
       return (Params[bestAcInd])
     }
     else if(parameterMode==1)
     {
-      print("Confusion Matrix:")
-      printConfusinMatrix(CMsAll[bestF1Ind],ClassNames)
       return (Params[bestF1Ind])
     }
   }
@@ -362,4 +433,14 @@ fileClassification<-function(inputFile,modelName)
   return (returnoffileclassification)
   
   
-  }
+}
+
+
+
+x=matrix(c(1,4,2,5,3,6),nrow=2)
+z=matrix(c(11,14,12,15,13,16),nrow=2)
+w=matrix(c(21,24,22,25,23,26),nrow=2)
+features=list(x,z,w)
+
+
+
