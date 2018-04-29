@@ -133,10 +133,31 @@ x<-c(lapply(features,length))
     } 
   }
   
+<<<<<<< HEAD
+}
+
+m = array(1:60, dim=c(3,4,5))
+l=NCOL(m)
+l
+k=list(a=a,b=b,l=l)
+a=c(1,2)
+b=c(9,10)
+l=c(4,7)
+print(k$b)
+
+print(length(b))
+
+
+
+
+features=list('a'=c(1,2,3,4),'b'=c(3,4,5,6,6,7),'c'=c(4,2,7,5,9,8,0,0,2))
+
+=======
 classifierParams<-c(1, 3, 5, 7, 9, 11, 13, 15)
  
 #features=list('a'=c(1,2,3,4),'b'=c(3,4,5,6,6,7),'c'=c(4,2,7,5,9,8,0,0,2))
   features2<-list()
+>>>>>>> 27bb4bb4ee8eb156d7aa8522855c03b5cfda878a
 for (f in features)
  
 

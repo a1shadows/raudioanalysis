@@ -100,7 +100,7 @@ randSplitFeatures<-function(features,partTrain)
   featuresTest=list()
   partTrain=0.60
   for (f in features)
-    {
+  {
     numOfSamples=NROW(f)
     numOfDims=NCOL(f)
     b=seq(1,numOfSamples)
@@ -139,7 +139,6 @@ print(returnofrandSplitFeatures$featuresTest)
 
 evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTrain=0.90)
 {
-  #check return tye variables in list
   perTrain=0.60
   parameterMode=0
   x=matrix(c(1,2,3,4,5,6),ncol=2)
@@ -163,7 +162,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   nSampleTotal=0
   nExp=100
   for (f in features)
-    {
+  {
     nSampleTotal=nSampleTotal+NROW(f)
   }
   if(nSampleTotal>1000 & nExp>50 )
@@ -185,27 +184,27 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
       #returnofrandSplitFeatures=randSplitFeatures(featuresNorm,perTrain)
       """for (f in featuresNorm)
       {
-        print(f)
-        numOfSamples=NROW(f)
-        numOfDims=NCOL(f)
-        b=seq(1,numOfSamples)
-        randperm=sample(b,length(b),replace=FALSE)
-        nTrainSamples=round(partTrain*numOfSamples)
-        k1=c()
-        k1=randperm[1:nTrainSamples]
-        i1=c()
-        print(f)
-        i1=f[k1,1:numOfDims]
-        featuresTrain=list(featuresTrain,i1)
-        updatednTrainSamples=nTrainSamples+1
-        k2=c()
-        randpermlen=length(randperm)
-        k2=randperm[updatednTrainSamples:randpermlen]
-        i2=c()
-        i2=f[k2,1:numOfDims]
-        featuresTest=list(featuresTest,i2)
+      print(f)
+      numOfSamples=NROW(f)
+      numOfDims=NCOL(f)
+      b=seq(1,numOfSamples)
+      randperm=sample(b,length(b),replace=FALSE)
+      nTrainSamples=round(partTrain*numOfSamples)
+      k1=c()
+      k1=randperm[1:nTrainSamples]
+      i1=c()
+      print(f)
+      i1=f[k1,1:numOfDims]
+      featuresTrain=list(featuresTrain,i1)
+      updatednTrainSamples=nTrainSamples+1
+      k2=c()
+      randpermlen=length(randperm)
+      k2=randperm[updatednTrainSamples:randpermlen]
+      i2=c()
+      i2=f[k2,1:numOfDims]
+      featuresTest=list(featuresTest,i2)
       }
-"""
+      """
       featuresTrain=list()
       x1=matrix(c(-1,-1,-1,-1),ncol=2)
       z1=matrix(c(0,0,0,0),ncol=2)
@@ -223,7 +222,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
         nTestSamples=NROW(featuresTest[[c1]])#check NROW or length
         Results=matrix(0,nTestSamples,1)
         retclassifierWrapper=list()
-      
+        
         for (ss in seq(1,nTestSamples))
         {
           
@@ -240,27 +239,27 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
         }
       }
     }
-      CM+CM+CMt
-      CM=CM+0.0000000010
-      Rec=matrix(0,NROW(CM),1)
-      Pre=matrix(0,NROW(CM),1)
-      for (ci in seq(1,NROW(CM)))
-      {
-        Rec[ci]=CM[ci,ci]/sum(CM[ci,1:NCOL(CM)])
-        Pre[ci]=CM[ci,ci]/sum(CM[1:NROW(CM),ci])
-      }
-      PrecisionClassesAll=c(PrecisionClassesAll,Pre)
-      RecallClassesAll=c(RecallClassesAll,Rec)
-      F1=(2*Rec*Pre)/(Rec+Pre)
-      F1ClassesAll=c(F1ClassesAll,F1)
-      l1=sum(diag(CM))
-      l2=l1/sum(CM)
-      acAll=c(acAll,l2)
-      CMsAll=c(CMsAll,CM)
-      F1ALL=c(F1ALL,mean(F1))
-      
+    CM+CM+CMt
+    CM=CM+0.0000000010
+    Rec=matrix(0,NROW(CM),1)
+    Pre=matrix(0,NROW(CM),1)
+    for (ci in seq(1,NROW(CM)))
+    {
+      Rec[ci]=CM[ci,ci]/sum(CM[ci,1:NCOL(CM)])
+      Pre[ci]=CM[ci,ci]/sum(CM[1:NROW(CM),ci])
+    }
+    PrecisionClassesAll=c(PrecisionClassesAll,Pre)
+    RecallClassesAll=c(RecallClassesAll,Rec)
+    F1=(2*Rec*Pre)/(Rec+Pre)
+    F1ClassesAll=c(F1ClassesAll,F1)
+    l1=sum(diag(CM))
+    l2=l1/sum(CM)
+    acAll=c(acAll,l2)
+    CMsAll=c(CMsAll,CM)
+    F1ALL=c(F1ALL,mean(F1))
     
-  }
+    
+}
   print("\t\t")
   i=1
   for (c in ClassNames)
@@ -308,7 +307,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
       return (Params[bestF1Ind])
     }
   }
-}
+  }
 
 
 printConfusionMatrix<-function(CM,ClassNames)
@@ -326,22 +325,22 @@ printConfusionMatrix<-function(CM,ClassNames)
     }
     #print "\t{0:s}".format(c),
   }
-   for (c in ClassNames)
-   {
-     if(length(c)>4)
-     {
-       c=c[1:3]
-     }
-     #print "{0:s}".format(c),
-   }
-     for (j in seq(1,length(ClassNames)))
-     {
-       #print "\t{0:.2f}".format(100.0 * CM[i][j] / numpy.sum(CM)),
-     }
-   }
-    
-    
-  
+  for (c in ClassNames)
+  {
+    if(length(c)>4)
+    {
+      c=c[1:3]
+    }
+    #print "{0:s}".format(c),
+  }
+  for (j in seq(1,length(ClassNames)))
+  {
+    #print "\t{0:.2f}".format(100.0 * CM[i][j] / numpy.sum(CM)),
+  }
+}
+
+
+
 
 
 
@@ -416,7 +415,7 @@ fileClassification<-function(inputFile,modelName)
   returnreadaudiofile=list(Fs=Fs,x=x)
   returnreadaudiofile=audioBasicIO.readAudioFile(inputFile)
   returnreadaudiofile$x=audioBasicIO.readAudioFile(returnreadaudiofile$x)
- # if isinstance(x, int):                               
+  # if isinstance(x, int):                               
   #  return (-1, -1, -1)
   returnnull=list(ret1=-1,ret2=-1,ret2=-1)
   if((NROW(x)/Fs)<=mtWin)
