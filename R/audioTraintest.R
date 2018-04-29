@@ -42,11 +42,6 @@ for (f in features)
        
      }
   
-
-
-
-
-
 }
 
 m = array(1:60, dim=c(3,4,5))
