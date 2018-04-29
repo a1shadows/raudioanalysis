@@ -676,7 +676,7 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     f = dirWavFeatureExtractionReturns[[1]]
     fn = dirWavFeatureExtractionReturns[[2]]
     if(dim(f) > 0){
-      features = c(features, f)
+      features = f
       fileNames = c(fileNames, fn)
       if (d[length(d)] == .Platform$file.sep){
         x = strsplit(d, .Platform$file.sep)
