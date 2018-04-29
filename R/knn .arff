@@ -1,0 +1,9 @@
+@RELATION  knn
+@ATTRIBUTE   features 1  NUMERIC
+@ATTRIBUTE class { 
+@RELATION  knn
+@ATTRIBUTE   features 1  NUMERIC
+@ATTRIBUTE class { 
+@RELATION  knn
+@ATTRIBUTE   features 1  NUMERIC
+@ATTRIBUTE class { 

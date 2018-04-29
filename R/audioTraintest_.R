@@ -1,10 +1,10 @@
 
 source("audioFeatureExtraction.R")
 library(pdist)
-featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName, computeBEAT=False, perTrain=0.90) 
+featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="knn", computeBEAT=FALSE, perTrain=0.90) 
 {
-  k=list(features=features,classnames=classnames,filenames=filenames)
-  k=aF.dirsWavFeatureExtraction(listOfDirs, mtWin, mtStep, stWin, stStep, computeBEAT=computeBEAT)
+  k=list()
+  k=dirsWavFeatureExtraction(listOfDirs, mtWin, mtStep, stWin, stStep, computeBEAT=computeBEAT)
   if(length(k$features)==0)
   {
     print ("trainSVM_feature ERROR: No data found in any input folder!")

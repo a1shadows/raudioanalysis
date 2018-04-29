@@ -1,5 +1,5 @@
 library("seewave")
-source("R/audioIO.R")
+source("audioIO.R")
 eps = 0.00000001
 
 #frame will have to be converted into a vector
@@ -126,89 +126,89 @@ stSpectralRollOff <- function(X, c, fs){
 stHarmonic<-function(frame, fs)
 {
   m = round(0.016*fs) -
-  p<-c()
-  a<-c()
-  M<-round(0.016 * fs) - 1
-  ##print(cat("M", M))
-  R<-cor(frame, frame)
-  ##print(cat("R", R))
-  g<-R[length(frame)-1]
-  ##print(cat("g", g))
-  R<-rev(R)
-  ##print(cat("R", R))
-  a<-sign(R)
-  ##print(cat("a", a))
-  k=1
-  m[1]=a[1]
-  for (i in 2:length(a)){
-    m[i]<-a[i]-a[i-1]
-    
-  }
-  ##print(m)
-  
-  for (i in 1:length(m))
-  {
-    if(m[i]!=0)
-    {
-      p[k]=m[i]
-      k<-k+1
-    }
-    
-  }
-  ##print(p)
-  if( length(p) == 0)
-  {
-    m0 <- length(R)-1
-    
-  }
-  else
-  {
-    m0 <- p[1]
-  }
-  
-  if(  M > length(R))
-  {
-    M<-length(R) - 1
-  }
-  Gamma<-rep(0,M)
-  Csum<-cumsum(frame^2)
-  ##print(m0)
-  Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
-  ##print(cat("gamma", Gamma))
-  ZCR<-stZCR(Gamma)
-  if(ZCR>0.15)
-  {
-    HR= 0.0
-    f0<-0.0
-  }
-  
-  else
-  {
-    if( length(Gamma) == 0)
+    p<-c()
+    a<-c()
+    M<-round(0.016 * fs) - 1
+    ##print(cat("M", M))
+    R<-cor(frame, frame)
+    ##print(cat("R", R))
+    g<-R[length(frame)-1]
+    ##print(cat("g", g))
+    R<-rev(R)
+    ##print(cat("R", R))
+    a<-sign(R)
+    ##print(cat("a", a))
+    k=1
+    m[1]=a[1]
+    for (i in 2:length(a)){
+      m[i]<-a[i]-a[i-1]
       
-    {  HR = 1.0
-    blag<-0.0
-    Gamma<-rep(0,M)}
+    }
+    ##print(m)
+    
+    for (i in 1:length(m))
+    {
+      if(m[i]!=0)
+      {
+        p[k]=m[i]
+        k<-k+1
+      }
+      
+    }
+    ##print(p)
+    if( length(p) == 0)
+    {
+      m0 <- length(R)-1
+      
+    }
     else
     {
-      HR<-max(Gamma)
-      blag<-argmax(Gamma)
-      
+      m0 <- p[1]
     }
-  }
-  
-  f0<-fs / (blag + eps)
-  if (f0 > 5000)
-  {
-    f0 = 0.0
-  }
-  if (HR < 0.1)
-  {
-    f0 = 0.0
-  }
-  ##print(cat("HR",HR))
-  ##print(cat("f0", f0))
-  return(c(f0, HR))
+    
+    if(  M > length(R))
+    {
+      M<-length(R) - 1
+    }
+    Gamma<-rep(0,M)
+    Csum<-cumsum(frame^2)
+    ##print(m0)
+    Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
+    ##print(cat("gamma", Gamma))
+    ZCR<-stZCR(Gamma)
+    if(ZCR>0.15)
+    {
+      HR= 0.0
+      f0<-0.0
+    }
+    
+    else
+    {
+      if( length(Gamma) == 0)
+        
+      {  HR = 1.0
+      blag<-0.0
+      Gamma<-rep(0,M)}
+      else
+      {
+        HR<-max(Gamma)
+        blag<-argmax(Gamma)
+        
+      }
+    }
+    
+    f0<-fs / (blag + eps)
+    if (f0 > 5000)
+    {
+      f0 = 0.0
+    }
+    if (HR < 0.1)
+    {
+      f0 = 0.0
+    }
+    ##print(cat("HR",HR))
+    ##print(cat("f0", f0))
+    return(c(f0, HR))
 }
 #arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
 ##print(cat(arr))
@@ -269,7 +269,7 @@ stChromaFeatures <- function(X, fs, nChroma, nFreqsPerChroma){
   ##print(cat('newD', newD))
   C2 = rep(0, newD)
   C2[1:length(C)] = C
-
+  
   C2 = matrix(C2, ncol = length(C2) / 12, nrow = 12)
   C2 = t(C2)
   ##print(length(colSums(C2)))
@@ -475,7 +475,7 @@ stFeatureExtraction <- function(signal, win, step){
   #stop("testing stFeatures")
   return (stFeatures)
   
-
+  
 }
 
 mtFeatureExtraction <- function(signal, fs, MtWin, MtStep, stWin, stStep) {
@@ -525,7 +525,7 @@ mtFeatureExtraction <- function(signal, fs, MtWin, MtStep, stWin, stStep) {
     mtFeatures = c(mtFeatures, mt1, mt2)
   }
   mtFeatures = t(matrix(mtFeatures, nrow = numOfFeatures*numOfStatistics))
- #stFeatures = t(matrix(stFeatures, nrow = 33))
+  #stFeatures = t(matrix(stFeatures, nrow = 33))
   #mtFeatures = sapply (mtFeatures, function (x) {length (x) <- length(curStFeatures); return (x)})
   ##print(mtFeatures)
   #stop("wewewe")
@@ -689,6 +689,7 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     }
     
   }
+ 
   return(list(features, classNames, fileNames))
 }
 shortTermWindow = 0.050

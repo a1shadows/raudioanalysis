@@ -24,4 +24,3 @@ readAudioFile <- function(filepath){
   #return(list(waveObj@samp.rate, waveObj@left))
   return(waveObj)
 }
-
