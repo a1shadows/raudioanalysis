@@ -8,7 +8,9 @@ eps = 0.00000001
 
 
 stZCR <- function(frame){
-  return(zcr(frame, wl = NULL))
+  count = length(frame)
+  countZ = sum(abs(diff(sign(frame)))) / 2
+  return (countZ / (count-1.0))
 }
 
 
@@ -57,7 +59,7 @@ stSpectralCentroidAndSpread<-function(X,fs)
   eps<-0.00000001
   
   ind<-array(seq(1,length(X)+1))*(fs/(2.0*length(X)))
-  print(ind)
+  ##print(ind)
   Xt<-X
   Xt<-max(Xt)
   num<-sum(ind*Xt)
@@ -66,9 +68,9 @@ stSpectralCentroidAndSpread<-function(X,fs)
   S=sqrt(sum(((ind-C)^2)*Xt)/den)
   C=C/(fs/2.0)
   S=S/(fs/2.0)
-  print(C)
-  print(S)  
-  return(C)
+  ##print(C)
+  ##print(S)  
+  return(c(C, S))
 }
 
 
@@ -123,26 +125,26 @@ stSpectralRollOff <- function(X, c, fs){
 
 stHarmonic<-function(frame, fs)
 {
-  m<-c()
+  m = round(0.016*fs) -
   p<-c()
   a<-c()
   M<-round(0.016 * fs) - 1
-  print(cat("M", M))
+  ##print(cat("M", M))
   R<-cor(frame, frame)
-  print(cat("R", R))
+  ##print(cat("R", R))
   g<-R[length(frame)-1]
-  print(cat("g", g))
+  ##print(cat("g", g))
   R<-rev(R)
-  print(cat("R", R))
+  ##print(cat("R", R))
   a<-sign(R)
-  print(cat("a", a))
+  ##print(cat("a", a))
   k=1
   m[1]=a[1]
   for (i in 2:length(a)){
     m[i]<-a[i]-a[i-1]
     
   }
-  print(m)
+  ##print(m)
   
   for (i in 1:length(m))
   {
@@ -153,7 +155,7 @@ stHarmonic<-function(frame, fs)
     }
     
   }
-  print(p)
+  ##print(p)
   if( length(p) == 0)
   {
     m0 <- length(R)-1
@@ -170,9 +172,9 @@ stHarmonic<-function(frame, fs)
   }
   Gamma<-rep(0,M)
   Csum<-cumsum(frame^2)
-  print(m0)
+  ##print(m0)
   Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
-  print(cat("gamma", Gamma))
+  ##print(cat("gamma", Gamma))
   ZCR<-stZCR(Gamma)
   if(ZCR>0.15)
   {
@@ -204,53 +206,52 @@ stHarmonic<-function(frame, fs)
   {
     f0 = 0.0
   }
-  print(cat("HR",HR))
-  print(cat("f0", f0))
-  #return(c(f0, HR))
+  ##print(cat("HR",HR))
+  ##print(cat("f0", f0))
+  return(c(f0, HR))
 }
-arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
-#print(cat(arr))
-stHarmonic(arr , 10000)
+#arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
+##print(cat(arr))
+#stHarmonic(arr , 10000)
 
 #MFCC will be called from tineR
 
-stChormaFeaturesInit<-function(nfft,fs)
+stChromaFeaturesInit<-function(nfft,fs)
 {
   k=seq(1,nfft)
   freqs=c()
   for (f in k)
   {
-    freqs=append(freqs,(((f+1)*5)/(2*20)))
+    freqs=c(freqs, (((f+1)*fs)/(2*nfft)))
   }
-  print(freqs)
-  cp=27.50
-  nChroma=round(12.0*log2(freqs/cp),digits=0)
-  l<-NROW(nChroma)
-  print(l)
-  print(nChroma)
-  nFreqsPerChroma=matrix(0,l,1)
+  ##print(freqs)
+  cp = 27.50
+  nChroma = round(12.0*log2(freqs/cp),digits=0)
+  l = length(nChroma)
+  ##print(l)
+  ##print(typeof(nChroma))
+  nFreqsPerChroma = rep(0, l) 
   uChroma=unique(nChroma)
   for (u in uChroma)
   {  
     idx=which(nChroma==u,arr.ind = TRUE)
-    nFreqsPerChroma[idx]=NCOL(idx[0])
+    nFreqsPerChroma[idx]=length(idx)
     
   }
-  nFreqsPerChroma=t(nFreqsPerChroma)
-  mylist<-list(val1=nChroma,val2=nFreqsPerChroma)
-  
-  return(mylist)
+  ##print(nFreqsPerChroma)
+  return(list(nChroma, nFreqsPerChroma))
 }
 
 stChromaFeatures <- function(X, fs, nChroma, nFreqsPerChroma){
   
   chromaNames = c('A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#')  
   spec = X ** 2
-  
+  ##print(X)
+  ##print(nFreqsPerChroma)
   if (max(nChroma) < length(nChroma)){
     C = rep(0, length(nChroma))
     C[nChroma + 1] = spec
-    C  = C / nFreqsPerChroma 
+    C  = C / nFreqsPerChroma[nChroma + 1]
   }
   
   else{
@@ -260,14 +261,22 @@ stChromaFeatures <- function(X, fs, nChroma, nFreqsPerChroma){
     C = C / nFreqsPerChroma
     
   }
-  
+  ##print(C[which(C!=0, arr.ind = TRUE)])
   finalC = matrix(rep(0, 12), nrow = 12, ncol = 1)
+  ##print(finalC)
+  
   newD = ceiling(length(C) / 12) * 12
+  ##print(cat('newD', newD))
   C2 = rep(0, newD)
   C2[1:length(C)] = C
-  C2 = matrix(C2, nrow = length(C2) / 12, ncol = 12)
-  finalC = t(rowSums(C2))
+
+  C2 = matrix(C2, ncol = length(C2) / 12, nrow = 12)
+  C2 = t(C2)
+  ##print(length(colSums(C2)))
+  finalC = matrix(colSums(C2), nrow = 12)
+  ##print(dim(finalC))
   finalC = finalC / sum(spec)
+  #stop("nigga")
   return(list(chromaNames, finalC))
 }
 
@@ -308,12 +317,12 @@ stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
     C=C[,1]
     C
     if(countframes==1){
-      print("hello")
+      ##print("hello")
       chromagram=t(C)
     }else{
       chromagram=rbind(chromagram,t(C))
     }
-    print(chromagram)
+    ##print(chromagram)
     FreqAxis=chromanames
     TimeAxis=c()
     ro=NROW(chromagram)
@@ -326,19 +335,19 @@ stChromagram<-function(signal,Fs,Win,Step,PLOT=FALSE)
     }
     
   }
-  print(chromagram)
-  print(TimeAxis)
-  print(FreqAxis)
+  ##print(chromagram)
+  ##print(TimeAxis)
+  ##print(FreqAxis)
   
   ret=list(TimeAxis=TimeAxis,chromagram=chromagram,FreqAxis=FreqAxis)
   return (ret)
 }
 
-ans=list()
-ans=stChromagram(signal,Fs,Win,Step)
-print(ans$TimeAxis)
-print(ans$chromagram)
-print(ans$FreqAxis)
+#ans=list()
+##ans=stChromagram(signal,Fs,Win,Step)
+##print(ans$TimeAxis)
+##print(ans$chromagram)
+##print(ans$FreqAxis)
 
 
 library(signal)
@@ -352,7 +361,7 @@ phormants<-function(x,Fs)
   i=1
   for (j in N)
   {
-    print(j)
+    ##print(j)
     tri=cos((2*3.14*j)/(N1-1))
     w[i]=0.54-0.46*tri
     i=i+1
@@ -367,34 +376,39 @@ phormants<-function(x,Fs)
 
 stFeatureExtraction <- function(signal, win, step){
   Fs = signal@samp.rate
-  Win = as.integer(win)
-  Step = as.integer(step)
-  
+  Win = as.integer(round(Fs * win))
+  Step = as.integer(round(Fs * step))
+  ##print(signal@left)
+  #stop("signal testing")
   #Signal normalized at input stage
+  ##print("st1")
   
-  N = len(signal@left)
-  curPos = 0
+  N = length(signal@left)
+  curPos = 1
   countFrames = 0
   nFFT = Win / 2
   
-  mfccInitFilterBanksReturns = mfccInitFilterBanks(Fs, nFFT)
-  fbank = mfccInitFilterBanksReturns[1]
-  freqs = mfccInitFilterBanksReturns[2]
-  
+  ##print("st2")
   stChromaFeaturesInitReturns = stChromaFeaturesInit(nFFT, Fs)
-  nChroma = stChromaFeaturesInitReturns[1]
-  nFreqsPerChroma = stChromaFeaturesInitReturns[2]
-  
-  numOfTimeSpectralFeatueres = 8
+  ##print("st3")
+  nChroma = stChromaFeaturesInitReturns[[1]]
+  ##print(nChroma)
+  nFreqsPerChroma = stChromaFeaturesInitReturns[[2]]
+  ##print("st5")
+  numOfTimeSpectralFeatures = 8
   numOfHarmonicFeatures = 0
-  nceps = 13
+  nceps = 12
   numOfChromaFeatures = 13
   totalNumOfFeatures = numOfTimeSpectralFeatures + nceps + numOfHarmonicFeatures + numOfChromaFeatures
-  
-  stFeatures = list()
+  ##print(cat("st6", win, step))
+  MFCC = melfcc(signal, wintime = win, hoptime = step)
+  ##print("st7")
+  stFeatures = c()
+  ##print(cat("N", N))
   while (curPos + Win - 1 < N){
     countFrames = countFrames +  1
-    x = signal@left[curPos:curPos + Win - 1]
+    ##print(cat("indices", curPos,"|", curPos + Win - 1, length(signal@left[curPos:(curPos + Win - 1)])))
+    x = signal@left[curPos:(curPos + Win - 1)]
     curPos = curPos + Step
     X = abs(fft(x))
     X = X[1:nFFT]
@@ -405,69 +419,116 @@ stFeatureExtraction <- function(signal, win, step){
         Xprev = c(Xprev, i)
       }
     }
-    curFV = rep(0, totalNumOfFeatures)
-    
-    curFV[1] = stZCR(x)                              # zero crossing rate
+    curFV = c()
+    ##print(cat("x", x))
+    curFV[1] = zcr(x, f = Fs, win = NULL, plot = FALSE)                              # zero crossing rate
+    ##print("1")
     curFV[2] = stEnergy(x)                           # short-term energy
+    ##print("2")
     curFV[3] = stEnergyEntropy(x)                    # short-term entropy of energy
+    ##print(3)
     stSpectralCentroidAndSpreadReturns = stSpectralCentroidAndSpread(X, Fs) # spectral centroid and spread
-    curFV[4] = stSpectralCentroidAndSpreadReturns[1]  
-    curFV[5] = stSpectralCentroidAndSpreadReturns[2]   
+    ##print(3)
+    curFV[4] = stSpectralCentroidAndSpreadReturns[[1]]  
+    ##print(4)
+    curFV[5] = stSpectralCentroidAndSpreadReturns[[2]]   
+    ##print(5)
     curFV[6] = stSpectralEntropy(X)                  # spectral entropy
+    ##print(6)
     curFV[7] = stSpectralFlux(X, Xprev)              # spectral flux
+    ##print(7)
     curFV[8] = stSpectralRollOff(X, 0.90, Fs)        # spectral rolloff
-    curFV[numOfTimeSpectralFeatures + 1 : numOfTimeSpectralFeatures+nceps] = stMFCC(X, fbank, nceps).copy()    # MFCCs
-    
-    stChromaFeaturesReturns = stChormaFeatures(X, Fs, nChroma, nFreqsPerChroma)
-    chromaNames = stChromaFeaturesReturns[1]
-    chromaF = stChromaFeaturesReturns[2]
-    curFV[numOfTimeSpectralFeatueres + nceps + 1 : numOfTimeSpectralFeatueres + nceps + numOfChromaFeatures] = chromaF
-    curFV[numOfTimeSpectralFeatures + nceps + numOfChromaFeatures] = std(chromaF)
+    ##print(8)
+    for (i in 9:20)
+    {
+      curFV[i] =  MFCC[countFrames,i - 8]   # MFCCs
+    }
+    ##print(cat(numOfTimeSpectralFeatures + 1, numOfTimeSpectralFeatures+nceps, MFCC[countFrames,]))
+    stChromaFeaturesReturns = stChromaFeatures(X, Fs, nChroma, nFreqsPerChroma)
+    chromaNames = stChromaFeaturesReturns[[1]]
+    chromaF = stChromaFeaturesReturns[[2]]
+    ##print(cat("chromaF", chromaF))
+    ##print(cat(numOfTimeSpectralFeatures + nceps + 1 , numOfTimeSpectralFeatures + nceps + numOfChromaFeatures, length(chromaF)))
+    for(i in 21:32){
+      curFV[i] = chromaF[i-20]
+    }
+    curFV[numOfTimeSpectralFeatures + nceps + numOfChromaFeatures] = sd(chromaF)
+    ##print(stFeatures)
+    ##print("|")
     stFeatures = c(stFeatures, curFV)
-    
+    ##print(cat(countFrames, length(stFeatures)))
+    ##print("st8")
+    ##print()
+    #stop("testing   curFV")
+    rm(curFv)
     for(i in X){
-      Xprev = c(Xprev, i)
+      ##print('-')
+      Xprev[length(Xprev) + 1] =  i
     }
   }
   
   #stFeatures = numpy.concatenate(stFeatures, 1) #Doubt
+  ##print(stFeatures)
+  stFeatures = t(matrix(stFeatures, nrow = 33))
+  #stFeatures = sapply (stFeatures, function (x) {length (x) <- length(numOfTimeSpectralFeatures + nceps + numOfChromaFeatures); return (x)})
+  ##print(length(stFeatures[1,]))
+  #stop("testing stFeatures")
   return (stFeatures)
   
+
 }
 
-mtFeatureExtraction <- function(signal, mtWin, mtStep, stWin, stStep) {
+mtFeatureExtraction <- function(signal, fs, MtWin, MtStep, stWin, stStep) {
   
+  mtWin = round(MtWin * fs)
+  mtStep = round(MtStep * fs)
   Fs = signal@samp.rate
-  mtWinRatio = as.integer(round(mtWin / stStep))
-  mtStepRatio = as.integer(round(mtStep / stStep))
+  mtWinRatio = as.integer(round(mtWin / round(stStep * fs)))
+  ##print(cat(mtWinRatio, mtWin))
+  mtStepRatio = as.integer(round(mtStep / round(stStep * fs)))
   
   mtFeatures = list()
   
   stFeatures = stFeatureExtraction(signal, stWin, stStep)
-  numOfFeatures = length(srFeatures)
+  ##print(stFeatures)
+  ##print("yostFE")
+  numOfFeatures = length(stFeatures[1,])
+  #print(numOfFeatures)
+  #stop("te te testing")
   numOfStatistics = 2
   
-  for (i in 1 : numOfStatistics * numOfFeatures){
-    mtFeatures = list(mtFeatures, list())
-    
-  }
+  
+  ##print("mt1")
   
   for (i in 1:numOfFeatures){
+    ##print("mt2")
     curPos = 1
-    N = length(stFeatures[i])
-    while(curpos < N){
+    N = length(stFeatures[,i])
+    ##print(cat("mt3", N))
+    mt1 = c()
+    mt2 = c()
+    while(curPos < N){
+      ##print("mt4")
       N1 = curPos
       N2 = curPos + mtWinRatio
       if (N2 > N1){
         N2 = N
       }
-      curStFeatures = stFeatures[i][N1:N2 + 1]
+      ##print(cat("{}", N1, N2, i, dim(stFeatures)))
+      curStFeatures = stFeatures[N1:N2,i]
+      #stop("yaya")
       
-      mtFeatures[i] = list(mtFeatures[i], mean(curStFeatures))
-      mtFeatures[i + numOfFeatures] = list(mtFeatures[i + numOfFeatures], sd(curStFeatures))
+      mt1 = c(mt1, mean(curStFeatures))
+      mt2 = c(mt2, sd(curStFeatures))
       curPos = curPos + mtStepRatio
     }
+    mtFeatures = c(mtFeatures, mt1, mt2)
   }
+  mtFeatures = t(matrix(mtFeatures, nrow = numOfFeatures*numOfStatistics))
+ #stFeatures = t(matrix(stFeatures, nrow = 33))
+  #mtFeatures = sapply (mtFeatures, function (x) {length (x) <- length(curStFeatures); return (x)})
+  ##print(mtFeatures)
+  #stop("wewewe")
   return (list(mtFeatures, stFeatures))
 }
 
@@ -518,27 +579,30 @@ stFeatureSpeed <- function(signal, Win, Step){
 }
 
 dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, computeBEAT){
+  ##print("czcaca")
   if (missing(computeBEAT)){
     computeBEAT = FALSE
   }
-  allMtFeatures = list()
-  processingTimes = list()
+  allMtFeatures = c()
+  processingTimes = c()
   
   types = list("*.wav", "*.mp3")
-  wavFilesList = list()
+  wavFilesList = c()
   for (files in types){
-    wavFilesList = list(wavfile, Sys.glob(file.path(dirName, files)))
+    wavFilesList = c(wavFilesList, Sys.glob(file.path(dirName, files)))
   }
-  
+  ##print(wavFilesList)
   wavFilesList = sort(wavFilesList)
-  wavFilesList2 = list()
+  wavFilesList2 = c()
   for (i in 1:length(wavFilesList)){
     print(cat("Analyzing file {0:", i,"} of {1:", length(wavFilesList),"}: {2:", encoded_text_to_latex(wavFilesList[i], encoding = "utf8"),"}"))
     if (file.size(wavFilesList[i]) == 0){
       print("\t(EMPTY FILE -- SKIPPING)")
       next
     }
+    ##print(cat("wavfile", wavFilesList[i]))
     wfile = readAudioFile(wavFilesList[i])
+    ##print("yo")
     t1 = Sys.time()
     Fs = wfile@samp.rate
     
@@ -546,7 +610,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
       print("\tAUDIO FILE TOO SMALL - SKIPPING")
       next
     }
-    wavFilesList2 = list(wavFilesList2, wavFilesList[i])
+    wavFilesList2[length(wavFilesList2) + 1] =  wavFilesList[i]
     
     if (computeBEAT){
       #mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
@@ -557,33 +621,44 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
       #beatConf = beatExtractionReturns[2]
     }
     else{
-      mtFeatureExtractionReturns = mtFeatureExtraction(x, Fs, round(mtWin * Fs), round(mtStep * Fs), round(Fs * stWin), round(Fs * stStep))
-      MidTermFeatures = mtFeatureExtractionReturns[1]
+      mtFeatureExtractionReturns = mtFeatureExtraction(wfile, Fs, mtWin, mtStep, stWin, stStep)
+      ##print("yomtFER")
+      MidTermFeatures = mtFeatureExtractionReturns[[1]]
+      ##print(dim(MidTermFeatures))
+      
       
     }
     MidTermFeatures = t(MidTermFeatures)
+    MidTermFeatures = matrix(as.integer(MidTermFeatures), nrow = dim(MidTermFeatures)[1])
+    ##print((as.integer(MidTermFeatures)))
     MidTermFeatures = rowMeans(MidTermFeatures)
+    ##print(length(MidTermFeatures))
+    #stop("te tet testing")
+    rowlength = length(MidTermFeatures)
     
-    if(anyNA(MidTermFeatures) && any(!is.finite(MidTermFeatures))){
+    if(!(anyNA(MidTermFeatures)) && !(any(!is.finite(MidTermFeatures)))){
       if(computeBEAT){
-        MidTermFeatures = list(MidTermFeatures, beat)
-        MidTermFeatures = list(MidTermFeatures, beatConf)
+        MidTermFeatures[length(MidTermFeatures) + 1] = beat
+        MidTermFeatures[length(MidTermFeatures) + 1] = beatConf
       }
       if(length(allMtFeatures) == 0){
-        allMtFeatures = MidTermFeatures
+        allMtFeatures = c(allMtFeatures, MidTermFeatures)
       }
       else{
-        allMtFeatures[[length(allMtFeatures)+1]] = MidTermFeatures
+        allMtFeatures = c(allMtFeatures, MidTermFeatures)
       }
-      t2 = Sys.time
-      duration = as.float(length(x)) / as.float(Fs)
-      processingTimes = list(processingTimes, (t2 - t1) / duration)
+      t2 = Sys.time()
+      duration = as.numeric(length(wfile)) / as.numeric(Fs)
+      processingTimes[length(processingTimes) + 1] =  (as.POSIXct(t2) - as.POSIXct(t1)) / duration
       
     }
   }
   if (length(processingTimes) > 0){
     print(cat("Feature extraction complexity ratio:", mean(processingTimes), "x realtime"))
   }
+  allMtFeatures = t(matrix(allMtFeatures, nrow = rowlength))
+  #print(dim(allMtFeatures))
+  #stop("ye yippy yeye")
   return(list(allMtFeatures, wavFilesList2))
 }
 
@@ -596,9 +671,10 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   fileNames = list()
   for(i in 1:length(dirNames)){
     d = dirNames[i]
-    dirWavFeatureExtractionReturns = dirWavFeatureExtraction(d, mtWin, mtStep, stWin, stStep, computeBEAT = computeBEAT)
-    f = dirWavFeatureExtractionReturns[1]
-    fn = dirWavFeatureExtractionReturns[2]
+    #print(cat("dirname", d))
+    dirWavFeatureExtractionReturns = dirWavFeatureExtraction(d, mtWin, mtStep, stWin, stStep)
+    f = dirWavFeatureExtractionReturns[[1]]
+    fn = dirWavFeatureExtractionReturns[[2]]
     if(dim(f) > 0){
       features = list(features, f)
       fileNames = list(fileNames, fn)
@@ -615,6 +691,9 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   }
   return(list(features, classNames, fileNames))
 }
+shortTermWindow = 0.050
+shortTermStep = 0.050
+eps = 0.00000001
 
-
+#traceback(dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep))
 #USE SPECTPROP TO ADD MORE PROPERTIES
