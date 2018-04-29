@@ -125,136 +125,25 @@ writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
   
 }
 
-p<-"p.txt"
-
-fearures=list('a'=array(c(1,2,3,4),dim=c(2,2)),'b'=array(c(3,4,5,6,6,7),dim=c(3,2)),'c'=array(c(4,2,7,5,9,8,0,0,2),dim=c(3,3)))
-classnames=list('ayushi','parul','khyati','bhavya')
-x<-c(lapply(features,length))
-print(x[1])
-c=1
-for (i in features)
+loadKNNModel<-function(kNNModelName, isRegression=False)
 {
-  for (j in i)
-  {
-    cat(paste(as.numeric(round(j, 6))), file=p, append=TRUE, sep = "\n")
-    print("new")
-  }
-  
-  cat(paste(classnames[c]), file=p, append=TRUE, sep = "\n")
-      c=c+1
+  load(file=kNNModelNAme)
+   print(X)  
+   print(Y) 
+   print(MEAN) 
+   print(STD) 
+   print(classNames) 
+   print(mtWin) 
+   print(mtStep) 
+   print(stWin) 
+   print(stStep) 
+   #PROBLEM WITH K
+   X = as.array(X)
+   Y = as.array(Y)
+   MEAN = as.array(MEAN)
+   STD = as.array(STD)
+   p<-list(X=X,Y=Y, MEAN=MEAN, STD=STD, classNames=classNames, mtWin=mtWin, mtStep=mtStep, stWin=stWin, stStep=stStep)
+   return (p)
 }
-
-fearures=list('a'=array(c(1,2,3,4),dim=c(2,2)),'b'=array(c(3,4,5,6,6,7),dim=c(3,2)),'c'=array(c(4,2,7,5,9,8,0,0,2),dim=c(3,3)))
-
-normalizeFeatures<-function(features)
-{
-  
-  MEAN=colMeans(features)
-  library(matrixStats)
-  STD=colSds(features)
-  MEAN=MEAN+0.00000000000001
-  STD=STD+0.00000000000001
-  
-  
+   
 }
-    
-    
-    s=matrix(c(1,2),nrow=1,ncol=2)
-    library(matrixStats)
-
-    b=matrix(c(3,2,5,67,7,4,5,6,6),nrow=3,ncol=3)
-    print(b)
-    print(colMeans(b)+0.00000000000001)
-    print(colSds(b))
-    print(std(b, na.rm = TRUE))
-    print(sapply(b, sd, na.rm = TRUE))
-    MEAN=colMeans(features)
-    STD=colSds(features)
-    s=append(s,b)
-    mean(s)
-    print(t(s))
-    print((append(s,b)))
-    print(t(as.matrix(append(s,b))))
-    
-    for nSamples in range(f.shape[0]):
-      ft[nSamples, :] = (ft[nSamples, :] - MEAN) / STD
-    featuresNorm.append(ft)
-    
-    b=matrix(c(3,2,5,67,7,4,5,6,6),nrow=3,ncol=3)
-    my_scale <- function(x) {
-      apply(m, 2, function(x) {
-        (x - MEAN/STD
-      }) 
-    }
-    print(my_scale(b))
-    
-    library('som')
-    print(normalize(b,byrow="FALSE"))
-    
-    library(clusterSim)
-    data(b)
-    z1 <- data.Normalization(b,type="n1",normalization="column")
-    z2 <- data.Normalization(b,type="n10",normalization="row")
-    MEAN=colMeans(b)
-    STD=colSds(b)
-    featuresNorm=matrix()
-    for (f in b)
-    {
-      ft=f
-      
-      
-      ft = (ft- MEAN) / STD
-      featuresNorm=as.matrix(append(featuresNorm,ft)) 
-    }
-        
-     print(featuresNorm)
-     
-     
-     b=matrix(c(3,2,5,67,7,4,5,6,6),nrow=3,ncol=3)
-     featuresNorm=matrix()
-     
-     STDMEAN=colMeans(b)
-     library(matrixStats)
-     STD=colSds(b)
-     MEAN=MEAN+0.00000000000001
-     STD=STD+0.00000000000001
-     MEAN
-     ft=matrix()
-      ft=b
-      ft
-      k=0
-      for(i in 1:NROW(b))
-      {k=k+1
-        print (ft[c(i),])
-        print(ft[c(i), ] = (ft[c(i), ] - MEAN[c(k), ]) / STD[c(k),])
-        
-      }
-      
-      b=matrix(c(3,2,5,67,7,4,5,6,6),nrow=3,ncol=3)
-      featuresNorm=matrix()
-      
-      MEAN=rowMeans(b)
-      library(matrixStats)
-      STD=rowSds(b)
-      MEAN
-      STD
-      MEAN=MEAN+0.00000000000001
-      STD=STD+0.00000000000001
-      MEAN
-      STD
-        for(i in 1:NROW(b))
-        {
-          for(k in 1:NCOL(b))
-          {
-            print(MEAN[k])
-            print(STD[k])
-            print (ft[i,k])
-            g=(ft[i,k] - MEAN[k]) / STD[k]
-            print(g)
-          
-          }
-       
-        }
-     featuresNorm=(append(featuresNorm,ft)) 
-
-     

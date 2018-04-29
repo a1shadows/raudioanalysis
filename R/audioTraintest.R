@@ -183,16 +183,17 @@ for (f in features)
   q=listOfFeatures2Matrix(featuresNew)
   X=as.list(q[1])
   Y=as.list(q[2])
+  #file.create("modelName")
+  saveRDS(model, file = "model.rds")
   
-  
+ # saveRDS(model, file = "model.rds")
+  #Afterwards you can use
+  #loadedModel <- readRDS(model.rds)
 }
 
 
 #this must part left to code
-if classifierType == "knn":
-  [X, Y] = listOfFeatures2Matrix(featuresNew)
-X = X.tolist()
-Y = Y.tolist()
+
 fo = open(modelName, "wb")
 cPickle.dump(X, fo, protocol=cPickle.HIGHEST_PROTOCOL)
 cPickle.dump(Y,  fo, protocol=cPickle.HIGHEST_PROTOCOL)
@@ -206,3 +207,16 @@ cPickle.dump(stWin, fo, protocol=cPickle.HIGHEST_PROTOCOL)
 cPickle.dump(stStep, fo, protocol=cPickle.HIGHEST_PROTOCOL)
 cPickle.dump(computeBEAT, fo, protocol=cPickle.HIGHEST_PROTOCOL)
 fo.close()
+
+file.create("A")
+file.append("A", "heloooooo")
+
+logFile = "log_file.txt"
+cat("This is a log file for ... ", file=logFile, append=TRUE, sep = "\n")
+
+cat("This is a log file for ... ", file=logFile, append=TRUE, sep = "\n")
+
+x=list('ayushi')
+save(x, file = "model.rda")
+l<-load("model.rda")
+typeof(l)
