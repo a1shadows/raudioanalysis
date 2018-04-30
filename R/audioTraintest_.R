@@ -62,7 +62,7 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
   #print(features)
   #print("FEATURES 2:")
   #print(features)
-  bestParam = evaluateClassifier(k[[1]], classNames, 100, classifierType, classifierParams, 0)
+  bestParam = evaluateClassifier(k[[1]], classNames, 100, classifierParams, 0)
   #write the above function
   
   print ("Selected params :")
@@ -340,7 +340,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
     for (e in seq(1,nExp))
     { 
       print(cat("Param =",C,"- Classifier Evaluation Experiment",(e+1),"of",nExp))
-      retournofrandSplitFeatures=list(featuresTrain=featuresTrain,featuresTest=featuresTest)
+      retournofrandSplitFeatures=list()
       returnofrandSplitFeatures=randSplitFeatures(featuresNorm,perTrain)
       #as.numeric(unlist(returnofrandSplitFeatures$featuresTrain))
       returnlistOfFeatures2Matrix=list()
@@ -358,7 +358,8 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
         {
           
           featurestosend=features[[c1]]
-          #print(featurestosend)
+          print(featurestosend(NROW))
+          print(featurestosend(NCOL))
           featurestosend1=featurestosend[ss,1:NCOL(featurestosend)]
           #print(featurestosend1)
           #print(C)
@@ -467,7 +468,7 @@ normalizeFeatures<-function(features)
       {
         
         X=rbind(X,f)
-        print(X)
+        #print(X)
       }
       i=i+1
     }
@@ -477,18 +478,21 @@ normalizeFeatures<-function(features)
   MEAN=colMeans(X, na.rm = FALSE, dims = 1)+0.00000000000001
   STD=apply(X,2,sd)+0.00000000000001
   featuresNorm=list()
-  o=1
+
   for (i in seq(1,NCOL(features)))
   {
     f=features[1:NROW(features),i]
     
     ft=f
     print("ft is")
+    #print(ft)
+    print(NROW(ft))
+    print(NCOL(ft))
+    ft=(trunc((ft-MEAN)/STD))#errorrrrrrrrrrrrrrrrr
     print(ft)
-    ft[o,1:NCOL(ft)]=(trunc((ft[o,1:NCOL(ft)]-MEAN)/STD))
       
     featuresNorm=list(featuresNorm,ft)
-    o=o+1
+    #o=o+1
   }
   returnnormalizeFeatures=list(featuresNorm=featuresNorm,MEAN=MEAN,STD=STD)
   return (returnnormalizeFeatures)
