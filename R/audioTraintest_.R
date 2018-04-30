@@ -8,6 +8,7 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
   classNames=k[[2]]
   features=k[[1]]
   print(k[[1]])
+  stop("pingping")
   if(length(features)==0)
   {
     print ("trainSVM_feature ERROR: No data found in any input folder!")
@@ -200,23 +201,36 @@ listOfFeatures2Matrix<-function(features)
   
   X=c()
   Y=c()
-  i=0
-  for (f in features)
+  f = c()
+  # print("No of columns in Training dataset are:")
+  # print(NROW(features))
+  for (i in seq(1,NROW(features)))
   {
-    if(i==0)
-    {
-      X=f
-      Y=rbind(Y,i*matrix(1,NROW(f),1))
-    }
-    else
-    {
-      print("hello")
-      X=rbind(X,f)
-      Y=c(Y,i*matrix(1,NROW(f),1))
-    }
-    i=i+1
+    f = c(f, rep(i, dim(features)[2]))
+    # f=features[i,1:NCOL(features)]
+    # print(NROW(f))
+    # if(i==1)
+    # #{
+    #  
+    #   X=f
+    #   Y=(i)*(array(1,dim=c(NROW(f),1)))
+    # }
+    # else
+    # {
+    #   
+    #   X=rbind(X,f)
+    #   Y=c(Y,c((i)*(array(1,dim=c(NROW(f),1)))))
+    #   
+    # }
+    # 
   }
-  
+  #f = t(matrix(f, nrow = dim(features)[1]))
+  print(f)
+  stop("te te testing")
+  # print("X in this func")
+  # print(X)
+  # print("Y in this func")
+  # print(Y)
   returnlistOfFeatures2Matrix=list(X=X,Y=Y)
   return (returnlistOfFeatures2Matrix)
 }
@@ -226,7 +240,11 @@ trainKNN<-function(features,k)
   X=-1
   Y=-1
   l=list()
-  l=listOfFeatures2Matrix(features)
+  # print("Features in TrainKNN")
+  # print(features[[2]])
+  # print(NROW(features[[2]]))
+  # print(NCOL(features[[2]]))
+  l=listOfFeatures2Matrix(features[[2]])
   return (l)
   
 }
@@ -246,33 +264,31 @@ trainKNN<-function(features,k)
 
 randSplitFeatures<-function(features,partTrain)
 {
-  x=matrix(c(-1,-1,-1,-1,-1,-1),ncol=2)
-  z=matrix(c(0,0,0,0,0,0),ncol=2)
-  w=matrix(c(1,1,1,1,1,1),ncol=2)
-  features=list(x,z,w)
   featuresTrain=list()
   featuresTest=list()
-  partTrain=0.60
-  for (f in features)
-    {
-    numOfSamples=NROW(f)
-    numOfDims=NCOL(f)
+  partTrain=0.80
+  # for (i in seq(1,NCOL(features)))
+  #   {
+    #f=features[1:NROW(features),i]
+    f=features
+    numOfSamples=NCOL(f)
+    numOfDims=NROW(f)
     b=seq(1,numOfSamples)
     randperm=sample(b,length(b),replace=FALSE)
     nTrainSamples=round(partTrain*numOfSamples)
     k1=c()
     k1=randperm[1:nTrainSamples]
     i1=c()
-    i1=f[k1,1:numOfDims]
+    i1=f[1:numOfDims,k1]
     featuresTrain=list(featuresTrain,i1)
     updatednTrainSamples=nTrainSamples+1
     k2=c()
     randpermlen=length(randperm)
     k2=randperm[updatednTrainSamples:randpermlen]
     i2=c()
-    i2=f[k2,1:numOfDims]
+    i2=f[1:numOfDims,k2]
     featuresTest=list(featuresTest,i2)
-  }
+  
   retournofrandSplitFeatures=list(featuresTrain=featuresTrain,featuresTest=featuresTest)
   return (retournofrandSplitFeatures)
   
@@ -307,7 +323,8 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   print(features)
   returnnormalizefeatures=normalizeFeatures(features)
   featuresNorm=returnnormalizefeatures$featuresNorm
-  nClasses=length(features)
+  print(featuresNorm)
+  nClasses=NCOL(features)
   CALL=c()
   acAll=c()
   F1All=c()
@@ -318,10 +335,11 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   CMsAll=c()
   nSampleTotal=0
   nExp=100
-  for (f in features)
-    {
-    nSampleTotal=nSampleTotal+NROW(f)
-  }
+  nSampleTotal=NCOL(features)
+  # for (f in features)
+  #   {
+  #   nSampleTotal=nSampleTotal+NROW(f)
+  # }
   if(nSampleTotal>1000 & nExp>50 )
   {
     nExp=50
@@ -345,23 +363,34 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
       #as.numeric(unlist(returnofrandSplitFeatures$featuresTrain))
       returnlistOfFeatures2Matrix=list()
       featuresTrain=returnofrandSplitFeatures$featuresTrain
+      print("Training dataset")
+      print(featuresTrain)
       returnlistOfFeatures2Matrix=trainKNN(featuresTrain,C)
+      #print(returnlistOfFeatures2Matrix$X)
       featuresTest=returnofrandSplitFeatures$featuresTest
+      print(featuresTest)
+      stop("testing 1")
       CMt=matrix(0,nClasses,nClasses)
       for (c1 in seq(1,nClasses))
       {
         nTestSamples=NROW(featuresTest[[c1]])
         Results=matrix(0,nTestSamples,1)
         retclassifierWrapper=list()
-      
+        
+        print(nTestSamples)
+        featurestosend=featuresTest[[c1]]
         for (ss in seq(1,nTestSamples))
         {
           
-          featurestosend=features[[c1]]
-          print(featurestosend(NROW))
-          print(featurestosend(NCOL))
-          featurestosend1=featurestosend[ss,1:NCOL(featurestosend)]
-          #print(featurestosend1)
+          
+           print("featurestosend")
+           print(featurestosend)
+           print("n rows")
+           print(NROW(featurestosend))
+           print("n col")
+           print(NCOL(featurestosend))
+          featurestosend1=featurestosend[1:NCOL(featurestosend)]
+          print(featurestosend1)
           #print(C)
           X=returnlistOfFeatures2Matrix$X
           Y=returnlistOfFeatures2Matrix$Y
@@ -477,23 +506,25 @@ normalizeFeatures<-function(features)
   #print(X)
   MEAN=colMeans(X, na.rm = FALSE, dims = 1)+0.00000000000001
   STD=apply(X,2,sd)+0.00000000000001
-  featuresNorm=list()
+  featuresNorm=f
 
   for (i in seq(1,NCOL(features)))
   {
     f=features[1:NROW(features),i]
     
     ft=f
-    print("ft is")
+    #print("ft is")
     #print(ft)
     print(NROW(ft))
     print(NCOL(ft))
-    ft=(trunc((ft-MEAN)/STD))#errorrrrrrrrrrrrrrrrr
+    ft=(trunc((ft-MEAN)/STD))
     print(ft)
       
-    featuresNorm=list(featuresNorm,ft)
+    featuresNorm=rbind(featuresNorm,ft)
     #o=o+1
   }
+  #print(NROW(featuresNorm))
+  #print(NCOL(featuresNorm))
   returnnormalizeFeatures=list(featuresNorm=featuresNorm,MEAN=MEAN,STD=STD)
   return (returnnormalizeFeatures)
 }
@@ -510,5 +541,7 @@ normalizeFeatures<-function(features)
 # print(returnnormalizeFeatures$MEAN)
 # print(returnnormalizeFeatures$STD)
 
+
+featureAndTrain(c("../temp1", "../temp2"), 1.0, 1.0,shortTermWindow,shortTermStep)# "knn", "knnmodel", FALSE)
 
 
