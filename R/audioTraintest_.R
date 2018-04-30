@@ -1,26 +1,28 @@
-
 source("audioFeatureExtraction.R")
+source("loadparams.R")
 library(pdist)
 featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="knn", computeBEAT=FALSE, perTrain=0.90) 
 {
+  loadparameters()
   k=list()
   k=dirsWavFeatureExtraction(listOfDirs, mtWin, mtStep, stWin, stStep, computeBEAT=computeBEAT)
   classNames=k[[2]]
   features=k[[1]]
   print(k[[1]])
-  stop("pingping")
-  if(length(features)==0)
+  #stop("pingping")
+  if(dim(features)[1]==0)
   {
     print ("trainSVM_feature ERROR: No data found in any input folder!")
   }
   numOfFeatures=NCOL(features)
+  #print(numOfFeatures)
   featureNames<-c()
   for (i in 1:numOfFeatures)
   {
     featureNames[i]=paste("features",i)
   }
   writeTrainDataToARFF(modelName,k[[1]], classNames, featureNames)
-  #write this function
+ 
   x<-c(lapply(features,length))
   for (i in 1:length(x))
   {
@@ -226,7 +228,7 @@ listOfFeatures2Matrix<-function(features)
   }
   #f = t(matrix(f, nrow = dim(features)[1]))
   print(f)
-  stop("te te testing")
+  #stop("te te testing")
   # print("X in this func")
   # print(X)
   # print("Y in this func")
@@ -369,7 +371,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
       #print(returnlistOfFeatures2Matrix$X)
       featuresTest=returnofrandSplitFeatures$featuresTest
       print(featuresTest)
-      stop("testing 1")
+      #stop("testing 1")
       CMt=matrix(0,nClasses,nClasses)
       for (c1 in seq(1,nClasses))
       {
@@ -403,7 +405,7 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
         }
       }
     }
-      CM+CM+CMt
+      CM=CM+CMt
       CM=CM+0.0000000010
       Rec=matrix(0,NROW(CM),1)
       Pre=matrix(0,NROW(CM),1)

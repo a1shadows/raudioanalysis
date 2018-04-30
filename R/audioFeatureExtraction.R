@@ -669,14 +669,16 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   features = c()
   classNames = c()
   fileNames = c()
+  shapeF = c()
   for(i in 1:length(dirNames)){
     d = dirNames[i]
     #print(cat("dirname", d))
     dirWavFeatureExtractionReturns = dirWavFeatureExtraction(d, mtWin, mtStep, stWin, stStep)
     f = dirWavFeatureExtractionReturns[[1]]
+    shapeF = dim(f)
     fn = dirWavFeatureExtractionReturns[[2]]
-    if(dim(f) > 0){
-      features = f
+    #if(dim(f) > 0){
+      features = c(features, f)
       fileNames = c(fileNames, fn)
       if (d[length(d)] == .Platform$file.sep){
         x = strsplit(d, .Platform$file.sep)
@@ -687,9 +689,12 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
         #print(x[[1]][length(x) + 1])
         classNames = c(classNames, x[[1]][length(x) + 1])
       }
-    }
+    #}
     
   }
+  features = array(features, dim = c(length(dirNames), shapeF[2], shapeF[1]))
+  #print(features[1,,1])
+  #stop("boo")
   return(list(features, classNames, fileNames))
 }
 shortTermWindow = 0.050
