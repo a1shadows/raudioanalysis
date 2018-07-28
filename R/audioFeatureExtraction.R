@@ -1,5 +1,5 @@
 library("seewave")
-source("audioIO.R")
+source(paste0("R",.Platform$file.sep,"audioIO.R"))
 eps = 0.00000001
 
 #frame will have to be converted into a vector
@@ -59,7 +59,7 @@ stSpectralCentroidAndSpread<-function(X,fs)
   eps<-0.00000001
   
   ind<-array(seq(1,length(X)+1))*(fs/(2.0*length(X)))
-  ##print(ind)
+  ##(ind)
   Xt<-X
   Xt<-max(Xt)
   num<-sum(ind*Xt)
@@ -591,13 +591,16 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
   for (files in types){
     wavFilesList = c(wavFilesList, Sys.glob(file.path(dirName, files)))
   }
+  if(length(wavFilesList) == 0){
+    return(NULL)
+  }
   ##print(wavFilesList)
   wavFilesList = sort(wavFilesList)
   wavFilesList2 = c()
   for (i in 1:length(wavFilesList)){
-    print(cat("Analyzing file {0:", i,"} of {1:", length(wavFilesList),"}: {2:", encoded_text_to_latex(wavFilesList[i], encoding = "utf8"),"}"))
+    cat("Analyzing file", i,"of", length(wavFilesList),":", encoded_text_to_latex(wavFilesList[i], encoding = "utf8"),"\n")
     if (file.size(wavFilesList[i]) == 0){
-      print("\t(EMPTY FILE -- SKIPPING)")
+      print("\t(EMPTY FILE -- SKIPPING)\n")
       next
     }
     ##print(cat("wavfile", wavFilesList[i]))
@@ -607,7 +610,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     Fs = wfile@samp.rate
     
     if(length(wfile@left) < (Fs / 10)){
-      print("\tAUDIO FILE TOO SMALL - SKIPPING")
+      print("\tAUDIO FILE TOO SMALL - SKIPPING\n")
       next
     }
     wavFilesList2[length(wavFilesList2) + 1] =  wavFilesList[i]
@@ -654,7 +657,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     }
   }
   if (length(processingTimes) > 0){
-    print(cat("Feature extraction complexity ratio:", mean(processingTimes), "x realtime"))
+    cat("Feature extraction complexity ratio:", mean(processingTimes), "x realtime\n")
   }
   allMtFeatures = t(matrix(allMtFeatures, nrow = rowlength))
   #print(dim(allMtFeatures))
@@ -666,7 +669,7 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   if (missing(computeBEAT)){
     computeBEAT = FALSE
   }
-  features = c()
+  features = list()
   classNames = c()
   fileNames = c()
   shapeF = c()
@@ -678,7 +681,8 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     shapeF = dim(f)
     fn = dirWavFeatureExtractionReturns[[2]]
     #if(dim(f) > 0){
-      features = c(features, f)
+      #features = c(features, f)
+      features[[i]] = f
       fileNames = c(fileNames, fn)
       if (d[length(d)] == .Platform$file.sep){
         x = strsplit(d, .Platform$file.sep)
@@ -692,7 +696,7 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     #}
     
   }
-  features = array(features, dim = c(length(dirNames), shapeF[2], shapeF[1]))
+  #features = array(features, dim = c(length(dirNames), shapeF[2], shapeF[1]))
   #print(features[1,,1])
   #stop("boo")
   return(list(features, classNames, fileNames))
@@ -701,6 +705,6 @@ shortTermWindow = 0.050
 shortTermStep = 0.050
 eps = 0.00000001
 
-a = dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep)
+#a = dirsWavFeatureExtraction(c("../temp1", "../temp2", "../temp3"), 1.0, 1.0, shortTermWindow, shortTermStep)
 #traceback(dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep))
 #USE SPECTPROP TO ADD MORE PROPERTIES

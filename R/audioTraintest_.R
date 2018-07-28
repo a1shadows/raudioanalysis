@@ -1,66 +1,63 @@
-source("audioFeatureExtraction.R")
-source("loadparams.R")
+stop()
+source(paste0("R",.Platform$file.sep,"audioFeatureExtraction.R"))
 library(pdist)
-featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="knn", computeBEAT=FALSE, perTrain=0.90) 
+library(kernlab)
+
+featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, classifierType, modelName, computeBEAT, perTrain) 
 {
-  loadparameters()
-  k=list()
+  if (missing(computeBEAT)){
+    computeBEAT = F
+  }
+  if(missing(perTrain)){
+    perTrain = 0.09
+  }
+  #loadparameters()
   k=dirsWavFeatureExtraction(listOfDirs, mtWin, mtStep, stWin, stStep, computeBEAT=computeBEAT)
   classNames=k[[2]]
   features=k[[1]]
-  print(k[[1]])
+  #print(length(features))
   #stop("pingping")
-  if(dim(features)[1]==0)
-  {
-    print ("trainSVM_feature ERROR: No data found in any input folder!")
-  }
-  numOfFeatures=NCOL(features)
-  #print(numOfFeatures)
+  
+  numOfFeatures= dim(features[[1]])[2]
+  print(numOfFeatures)
+  #stop("t t ")
   featureNames<-c()
   for (i in 1:numOfFeatures)
   {
-    featureNames[i]=paste("features",i)
+    featureNames[i]=paste0("features",i)
   }
-  writeTrainDataToARFF(modelName,k[[1]], classNames, featureNames)
- 
-  x<-c(lapply(features,length))
-  for (i in 1:length(x))
-  {
-    
-    if (x[i] ==0)
-    {
-      print (cat("trainSVM_feature ERROR: ",listOfDirs[i]," folder is empty or non-existing!"))
-    } 
-  }
+  writeTrainDataToARFF(modelName, features, classNames, featureNames)
+  #stop("testing")
+
   
   classifierParams<-c(1, 3, 5, 7, 9, 11, 13, 15)
   
   #features=list('a'=c(1,2,3,4),'b'=c(3,4,5,6,6,7),'c'=c(4,2,7,5,9,8,0,0,2))
-  features2<-list()
-  for (f in features)
-  {
-    fTemp=list()
-    for(i in 1:length(features))
-    {
-      y=c(lapply(features,length))
-      for (j in 1:length(y[i]))
-      {temp=list()
-      temp = (features[i])
-      if((!any(is.nan(temp)))&(!any(is.infinite(temp))))
-        
-      { append(fTemp,temp)}
-      
-      else
-        
-      {
-        print ("NaN Found! Feature vector not used for training")
-      }
-      append(features2,fTemp)
-      
-      }
-    }
-  }
- 
+  # features2<-list()
+  # for (f in features)
+  # {
+  #   fTemp=list()
+  #   for(i in 1:length(features))
+  #   {
+  #     y=c(lapply(features,length))
+  #     for (j in 1:length(y[i]))
+  #     {temp=list()
+  #     temp = (features[i])
+  #     if((!any(is.nan(temp)))&(!any(is.infinite(temp))))
+  #       
+  #     { append(fTemp,temp)}
+  #     
+  #     else
+  #       
+  #     {
+  #       print ("NaN Found! Feature vector not used for training")
+  #     }
+  #     append(features2,fTemp)
+  #     
+  #     }
+  #   }
+  # }
+  # 
   #features = features2
   #print(features)
   #print("FEATURES 2:")
@@ -74,7 +71,7 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
   
   #give ouput in normalize features as a list
   w= normalizeFeatures(features)# normalize features function to be written
-  featuresNorm=w[1]
+  featuresNorm=w[[1]]
   
   MEAN = as.list(w[2])
   STD =as.list(w[3])
@@ -104,36 +101,37 @@ featureAndTrain<-function(listOfDirs, mtWin, mtStep, stWin, stStep, modelName="k
 
 writeTrainDataToARFF<-function(modelName, features, classNames, featureNames)
 {
-  
-  x<-paste(modelName,".arff")
-  cat(paste('@RELATION ', modelName), file=x, append=TRUE, sep = "\n")
+  #print("te te testing")
+  x<-paste0(modelName,".arff")
+  #print(x)
+  cat(paste('@RELATION ', modelName), file=x, append=FALSE, sep = "\n")
   
   
   for (fn in featureNames)
   {
+    #print(fn)
     cat(paste('@ATTRIBUTE ', fn ,' NUMERIC'), file=x, append=TRUE, sep = "\n")
   }
-  cat(paste('@ATTRIBUTE class { '), file=x, append=TRUE, sep = "\n")
-  for (c in 1:length(classNames))
+  cat(paste('@ATTRIBUTE class { '), file=x, append=TRUE, sep = "")
+  for (c in 1:(length(classNames) - 1))
   {
-    cat(paste(classNames[c],','), file=x, append=TRUE, sep = "\n")
+    #print(classNames[c])
+    cat(paste0(classNames[c], ","), file=x, append=TRUE, sep = "")
   }
-  cat(paste('}'), file=x, append=TRUE, sep = "\n")
-  cat(paste('@ATTRIBUTE class { '), file=x, append=TRUE, sep = "\n")
-  c=1
-  for (i in features)
-  {
-    for (j in i)
-    {
-      cat(paste(as.numeric(round(j, 6))), file=x, append=TRUE, sep = "\n")
-      
+  cat(paste0(classNames[length(classNames)]), file=x, append=TRUE, sep = "")
+  cat(paste('}\n'), file=x, append=TRUE, sep = "\n")
+  cat(paste('@DATA'), file=x, append=TRUE, sep = "\n")
+  for (i in 1:length(features)){
+    for (j in 1:dim(features[[i]])[1]){
+      for(k in 1:dim(features[[i]])[2]){
+        #cat(i, j, k, "\n")
+        cat(paste0(round(as.numeric(features[[i]][j, k]), 6), ","), file=x, append=TRUE, sep = "")
+      }
+      cat(paste0(classNames[i]), file=x, append=TRUE, sep = "\n")
     }
-    
-    cat(paste(classNames[c]), file=x, append=TRUE, sep = "\n")
-    c=c+1
   }
   
-  
+print("Aaaa")  
 }
 
 loadKNNModel<-function(kNNModelName, isRegression=False)
@@ -158,33 +156,45 @@ loadKNNModel<-function(kNNModelName, isRegression=False)
 }
 classify<-function(X,Y,k,testSample)
 {
-  
-  nClasses1=unique(Y)
-  nClasses=NROW(nClasses1)
-  i=NCOL(testSample)
+  # print("\n---")
+  # print(X)
+  # print("|")
+  # print(Y)
+  # print("|")
+  # print(k)
+  # print("||")
+  # print(testSample)
+  nClasses=length(unique(Y))
+  i=length(testSample)
   n=nrow(X)
-  m=nrow(Y)
+  m=length(Y)
   Yi=matrix(testSample,nrow=1,ncol=i)
   Ydist <- pdist(X, Yi)
   Ydist=as.matrix(Ydist)
-  
-  
+  #print(Ydist)
+
   iSort=order(Ydist)
-  iSort
-  P=matrix(0,nClasses,1)
-  P
+  P=c()
   y=iSort
+  #print(y)
   for(i in seq(1,nClasses))
   {
-    print(Y[1:k,y])
-    z=which(Y[1:k,y]==i,arr.ind=T)
-    print(z)
-    z1=NCOL(z)
-    P[i]=z1/k
+    #print(Y[,y])
+    print(y[1:k])
+    print(Y)
+    #stop("lkl")
+    z=which(Y[y[1:k]] == i,arr.ind=T)
+    #print(z)
+    #stop("yokoon");
+    #z1=NCOL(z)
+    P[i]=z/k
     print(P[i])
   }
+  #stop("poio")
   maxarg=which.max(P)
-  l=list(maxarg=maxarg,P=P)
+  print(maxarg)
+  #stop("ftf")
+  l=list(maxarg,P)
   return (l)
   
 }
@@ -204,37 +214,46 @@ listOfFeatures2Matrix<-function(features)
   X=c()
   Y=c()
   f = c()
+  for(i in 1:length(features)){
+    Y = c(Y, rep(i, dim(features[[i]])[1]))
+    if(length(Y) == 0){
+      X = matrix(features[[i]], ncol = dim(features[[i]])[2])
+    }
+    else
+      X = matrix(rbind(Y, features[[i]]), ncol = dim(features[[i]])[2])
+  }
+  #print(Y)
+  #stop("rer")
   # print("No of columns in Training dataset are:")
   # print(NROW(features))
-  for (i in seq(1,NROW(features)))
-  {
-    f = c(f, rep(i, dim(features)[2]))
-    # f=features[i,1:NCOL(features)]
-    # print(NROW(f))
-    # if(i==1)
-    # #{
-    #  
-    #   X=f
-    #   Y=(i)*(array(1,dim=c(NROW(f),1)))
-    # }
-    # else
-    # {
-    #   
-    #   X=rbind(X,f)
-    #   Y=c(Y,c((i)*(array(1,dim=c(NROW(f),1)))))
-    #   
-    # }
-    # 
-  }
-  #f = t(matrix(f, nrow = dim(features)[1]))
-  print(f)
+  # for (i in seq(1,NROW(features)))
+  # {
+  #   f = c(f, rep(i, dim(features)[2]))
+  #   # f=features[i,1:NCOL(features)]
+  #   # print(NROW(f))
+  #   # if(i==1)
+  #   # #{
+  #   #  
+  #   #   X=f
+  #   #   Y=(i)*(array(1,dim=c(NROW(f),1)))
+  #   # }
+  #   # else
+  #   # {
+  #   #   
+  #   #   X=rbind(X,f)
+  #   #   Y=c(Y,c((i)*(array(1,dim=c(NROW(f),1)))))
+  #   #   
+  #   # }
+  #   # 
+  # }
+  # #f = t(matrix(f, nrow = dim(features)[1]))
+  #print(f)
   #stop("te te testing")
   # print("X in this func")
   # print(X)
   # print("Y in this func")
   # print(Y)
-  returnlistOfFeatures2Matrix=list(X=X,Y=Y)
-  return (returnlistOfFeatures2Matrix)
+  return (list(X, Y))
 }
 
 trainKNN<-function(features,k)
@@ -246,7 +265,7 @@ trainKNN<-function(features,k)
   # print(features[[2]])
   # print(NROW(features[[2]]))
   # print(NCOL(features[[2]]))
-  l=listOfFeatures2Matrix(features[[2]])
+  l=listOfFeatures2Matrix(features)
   return (l)
   
 }
@@ -268,30 +287,33 @@ randSplitFeatures<-function(features,partTrain)
 {
   featuresTrain=list()
   featuresTest=list()
-  partTrain=0.80
   # for (i in seq(1,NCOL(features)))
   #   {
     #f=features[1:NROW(features),i]
-    f=features
-    numOfSamples=NCOL(f)
-    numOfDims=NROW(f)
-    b=seq(1,numOfSamples)
-    randperm=sample(b,length(b),replace=FALSE)
-    nTrainSamples=round(partTrain*numOfSamples)
-    k1=c()
-    k1=randperm[1:nTrainSamples]
-    i1=c()
-    i1=f[1:numOfDims,k1]
-    featuresTrain=list(featuresTrain,i1)
-    updatednTrainSamples=nTrainSamples+1
-    k2=c()
-    randpermlen=length(randperm)
-    k2=randperm[updatednTrainSamples:randpermlen]
-    i2=c()
-    i2=f[1:numOfDims,k2]
-    featuresTest=list(featuresTest,i2)
+    for(f in features){
+      numOfSamples = dim(f)[1]
+      #print(numOfSamples)
+      numOfDims = dim(f)[2]
+      nTrainSamples = round(partTrain * numOfSamples)
+      if(nTrainSamples == numOfSamples){
+        nTrainSamples = nTrainSamples - 1
+      }
+      #cat(nTrainSamples,numOfSamples, "\n")
+      #print(matrix(f[c(sample(1:nTrainSamples, size = length(1:nTrainSamples))),], ncol = numOfDims))
+      #stop("434")
+      featuresTrain[[length(featuresTrain) + 1]] = matrix(f[sample(1:nTrainSamples, size = length(1:nTrainSamples)),], ncol = numOfDims)
+      if(nTrainSamples == (numOfSamples - 1)){
+        featuresTest[[length(featuresTest) + 1]] = matrix(f[numOfSamples,], ncol = numOfDims)
+      }
+      else{
+      featuresTest[[length(featuresTest) + 1]] = matrix(f[sample(nTrainSamples + 1:numOfSamples, size = length(nTrainSamples + 1:numOfSamples)),], ncol = numOfDims)
+      }
+    }
+  #print(featuresTrain)
+  #print("dada")
+  #stop("tete")
   
-  retournofrandSplitFeatures=list(featuresTrain=featuresTrain,featuresTest=featuresTest)
+  retournofrandSplitFeatures=list(featuresTrain,featuresTest)
   return (retournofrandSplitFeatures)
   
 }
@@ -321,12 +343,12 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   # Params =c(1, 3, 5, 7, 9, 11, 13, 15)  
   # ClassNames=c('abc','bcd','pqr')
   # features=list(x,z,w)
-  returnnormalizefeatures=list()
-  print(features)
-  returnnormalizefeatures=normalizeFeatures(features)
-  featuresNorm=returnnormalizefeatures$featuresNorm
-  print(featuresNorm)
-  nClasses=NCOL(features)
+  # returnnormalizefeatures=list()
+  # #print(features)
+  featuresNorm=normalizeFeatures(features)
+  # featuresNorm=returnnormalizefeatures$featuresNorm
+  # print(featuresNorm)
+  nClasses=length(features)
   CALL=c()
   acAll=c()
   F1All=c()
@@ -337,11 +359,12 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   CMsAll=c()
   nSampleTotal=0
   nExp=100
-  nSampleTotal=NCOL(features)
-  # for (f in features)
-  #   {
-  #   nSampleTotal=nSampleTotal+NROW(f)
-  # }
+  #nSampleTotal=NCOL(features)
+  for (f in features){
+    nSampleTotal=nSampleTotal+(dim(f)[1])
+  }
+  #print(nSampleTotal)
+  #stop("te te")
   if(nSampleTotal>1000 & nExp>50 )
   {
     nExp=50
@@ -355,55 +378,72 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
   for (C in Params)
   {
     C1=C
-    print(C1)
+    #print(C1)
     CM=matrix(0,nClasses,nClasses)
     for (e in seq(1,nExp))
     { 
-      print(cat("Param =",C,"- Classifier Evaluation Experiment",(e+1),"of",nExp))
+      cat("Param =",format(C, nsmall =5),"- Classifier Evaluation Experiment",(e+1),"of",nExp, "\n")
+      
       retournofrandSplitFeatures=list()
       returnofrandSplitFeatures=randSplitFeatures(featuresNorm,perTrain)
       #as.numeric(unlist(returnofrandSplitFeatures$featuresTrain))
       returnlistOfFeatures2Matrix=list()
-      featuresTrain=returnofrandSplitFeatures$featuresTrain
-      print("Training dataset")
-      print(featuresTrain)
+      featuresTrain=returnofrandSplitFeatures[[1]]
+      #print("Training dataset")
+      #print(featuresTrain)
       returnlistOfFeatures2Matrix=trainKNN(featuresTrain,C)
+      X = returnlistOfFeatures2Matrix[[1]]
+      Y = returnlistOfFeatures2Matrix[[2]]
+      #print(Y)
+      #stop("testing 1")
       #print(returnlistOfFeatures2Matrix$X)
-      featuresTest=returnofrandSplitFeatures$featuresTest
-      print(featuresTest)
+      featuresTest=returnofrandSplitFeatures[[2]]
+      #print("yoyo")
+      #print(featuresTest)
       #stop("testing 1")
       CMt=matrix(0,nClasses,nClasses)
       for (c1 in seq(1,nClasses))
       {
         nTestSamples=NROW(featuresTest[[c1]])
-        Results=matrix(0,nTestSamples,1)
-        retclassifierWrapper=list()
+        Results=c()
+        for(ss in 1:nTestSamples){
+          #cat("\n", c1, ss, "\n")
+          #stop("creepyyy")
+          returning = classify(X, Y, C, featuresTest[[c1]][ss,])
+          Results[ss] = returning[[1]]
+          cat("|", Results[ss],"\n")
+          }
+        #retclassifierWrapper=list()
+        # 
+        # print(nTestSamples)
+        # featurestosend=featuresTest[[c1]]
+        # for (ss in seq(1,nTestSamples))
+        # {
+        #   
+        #   
+        #    print("featurestosend")
+        #    print(featurestosend)
+        #    print("n rows")
+        #    print(NROW(featurestosend))
+        #    print("n col")
+        #    print(NCOL(featurestosend))
+        #   featurestosend1=featurestosend[1:NCOL(featurestosend)]
+        #   print(featurestosend1)
+        #   #print(C)
+        #   X=returnlistOfFeatures2Matrix$X
+        #   Y=returnlistOfFeatures2Matrix$Y
+        #   retclassifierWrapper=classifierWrapper(X,Y,C,featurestosend1)
+        #   Results[ss]=retclassifierWrapper$maxarg
+        # }
         
-        print(nTestSamples)
-        featurestosend=featuresTest[[c1]]
-        for (ss in seq(1,nTestSamples))
-        {
-          
-          
-           print("featurestosend")
-           print(featurestosend)
-           print("n rows")
-           print(NROW(featurestosend))
-           print("n col")
-           print(NCOL(featurestosend))
-          featurestosend1=featurestosend[1:NCOL(featurestosend)]
-          print(featurestosend1)
-          #print(C)
-          X=returnlistOfFeatures2Matrix$X
-          Y=returnlistOfFeatures2Matrix$Y
-          retclassifierWrapper=classifierWrapper(X,Y,C,featurestosend1)
-          Results[ss]=retclassifierWrapper$maxarg
-        }
         for (c2 in seq(1,nClasses))
         {
           CMt[c1,c2]=length(which(Results==c2,arr.ind = TRUE))
         }
+        print(CMt)
+        stop("sfs")
       }
+      #readline()
     }
       CM=CM+CMt
       CM=CM+0.0000000010
@@ -484,51 +524,12 @@ evaluateClassifier<-function(features,ClassNames,nExp,Params,parameterMode,perTr
 
 normalizeFeatures<-function(features)
 {
-  X=array()
-  i=1
-  for (i in seq(1,NCOL(features)))
-  {
-    f=features[1:NROW(features),i]
-    if(NROW(f)>0)
-    {
-      if(i==1)
-      {
-        X=f
-      }
-      else
-      {
-        
-        X=rbind(X,f)
-        #print(X)
-      }
-      i=i+1
-    }
+  for(i in 1 : length(features)){
+    features[[i]] = (features[[i]] - mean(features[[i]]))/sd(features[[i]])
   }
-  #print("value of X is:")
-  #print(X)
-  MEAN=colMeans(X, na.rm = FALSE, dims = 1)+0.00000000000001
-  STD=apply(X,2,sd)+0.00000000000001
-  featuresNorm=f
-
-  for (i in seq(1,NCOL(features)))
-  {
-    f=features[1:NROW(features),i]
-    
-    ft=f
-    #print("ft is")
-    #print(ft)
-    print(NROW(ft))
-    print(NCOL(ft))
-    ft=(trunc((ft-MEAN)/STD))
-    print(ft)
-      
-    featuresNorm=rbind(featuresNorm,ft)
-    #o=o+1
-  }
-  #print(NROW(featuresNorm))
-  #print(NCOL(featuresNorm))
-  returnnormalizeFeatures=list(featuresNorm=featuresNorm,MEAN=MEAN,STD=STD)
-  return (returnnormalizeFeatures)
+  #print(features)
+  #stop("tet tr")
+    return (features)
 }
 
 
@@ -544,6 +545,6 @@ normalizeFeatures<-function(features)
 # print(returnnormalizeFeatures$STD)
 
 
-featureAndTrain(c("../temp1", "../temp2"), 1.0, 1.0,shortTermWindow,shortTermStep)# "knn", "knnmodel", FALSE)
+featureAndTrain(c("../temp1", "../temp2"), 1.0, 1.0,shortTermWindow,shortTermStep, "knn", "knnmodel", FALSE)
 
 
