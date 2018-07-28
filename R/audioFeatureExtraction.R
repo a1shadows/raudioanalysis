@@ -1,5 +1,5 @@
 library("seewave")
-source("R/audioIO.R")
+source(paste0("R",.Platform$file.sep,"audioIO.R"))
 eps = 0.00000001
 
 #frame will have to be converted into a vector
@@ -59,7 +59,7 @@ stSpectralCentroidAndSpread<-function(X,fs)
   eps<-0.00000001
   
   ind<-array(seq(1,length(X)+1))*(fs/(2.0*length(X)))
-  ##print(ind)
+  ##(ind)
   Xt<-X
   Xt<-max(Xt)
   num<-sum(ind*Xt)
@@ -126,89 +126,89 @@ stSpectralRollOff <- function(X, c, fs){
 stHarmonic<-function(frame, fs)
 {
   m = round(0.016*fs) -
-  p<-c()
-  a<-c()
-  M<-round(0.016 * fs) - 1
-  ##print(cat("M", M))
-  R<-cor(frame, frame)
-  ##print(cat("R", R))
-  g<-R[length(frame)-1]
-  ##print(cat("g", g))
-  R<-rev(R)
-  ##print(cat("R", R))
-  a<-sign(R)
-  ##print(cat("a", a))
-  k=1
-  m[1]=a[1]
-  for (i in 2:length(a)){
-    m[i]<-a[i]-a[i-1]
-    
-  }
-  ##print(m)
-  
-  for (i in 1:length(m))
-  {
-    if(m[i]!=0)
-    {
-      p[k]=m[i]
-      k<-k+1
-    }
-    
-  }
-  ##print(p)
-  if( length(p) == 0)
-  {
-    m0 <- length(R)-1
-    
-  }
-  else
-  {
-    m0 <- p[1]
-  }
-  
-  if(  M > length(R))
-  {
-    M<-length(R) - 1
-  }
-  Gamma<-rep(0,M)
-  Csum<-cumsum(frame^2)
-  ##print(m0)
-  Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
-  ##print(cat("gamma", Gamma))
-  ZCR<-stZCR(Gamma)
-  if(ZCR>0.15)
-  {
-    HR= 0.0
-    f0<-0.0
-  }
-  
-  else
-  {
-    if( length(Gamma) == 0)
+    p<-c()
+    a<-c()
+    M<-round(0.016 * fs) - 1
+    ##print(cat("M", M))
+    R<-cor(frame, frame)
+    ##print(cat("R", R))
+    g<-R[length(frame)-1]
+    ##print(cat("g", g))
+    R<-rev(R)
+    ##print(cat("R", R))
+    a<-sign(R)
+    ##print(cat("a", a))
+    k=1
+    m[1]=a[1]
+    for (i in 2:length(a)){
+      m[i]<-a[i]-a[i-1]
       
-    {  HR = 1.0
-    blag<-0.0
-    Gamma<-rep(0,M)}
+    }
+    ##print(m)
+    
+    for (i in 1:length(m))
+    {
+      if(m[i]!=0)
+      {
+        p[k]=m[i]
+        k<-k+1
+      }
+      
+    }
+    ##print(p)
+    if( length(p) == 0)
+    {
+      m0 <- length(R)-1
+      
+    }
     else
     {
-      HR<-max(Gamma)
-      blag<-argmax(Gamma)
-      
+      m0 <- p[1]
     }
-  }
-  
-  f0<-fs / (blag + eps)
-  if (f0 > 5000)
-  {
-    f0 = 0.0
-  }
-  if (HR < 0.1)
-  {
-    f0 = 0.0
-  }
-  ##print(cat("HR",HR))
-  ##print(cat("f0", f0))
-  return(c(f0, HR))
+    
+    if(  M > length(R))
+    {
+      M<-length(R) - 1
+    }
+    Gamma<-rep(0,M)
+    Csum<-cumsum(frame^2)
+    ##print(m0)
+    Gamma[m0:M]<-R[m0:M] /(sqrt(g * Csum[M:m0]) + eps)
+    ##print(cat("gamma", Gamma))
+    ZCR<-stZCR(Gamma)
+    if(ZCR>0.15)
+    {
+      HR= 0.0
+      f0<-0.0
+    }
+    
+    else
+    {
+      if( length(Gamma) == 0)
+        
+      {  HR = 1.0
+      blag<-0.0
+      Gamma<-rep(0,M)}
+      else
+      {
+        HR<-max(Gamma)
+        blag<-argmax(Gamma)
+        
+      }
+    }
+    
+    f0<-fs / (blag + eps)
+    if (f0 > 5000)
+    {
+      f0 = 0.0
+    }
+    if (HR < 0.1)
+    {
+      f0 = 0.0
+    }
+    ##print(cat("HR",HR))
+    ##print(cat("f0", f0))
+    return(c(f0, HR))
 }
 #arr<-array(c(-11,3,-55,6,60,80,-57,-316,-523,56,34,-819),dim=c(3,4))
 ##print(cat(arr))
@@ -269,7 +269,7 @@ stChromaFeatures <- function(X, fs, nChroma, nFreqsPerChroma){
   ##print(cat('newD', newD))
   C2 = rep(0, newD)
   C2[1:length(C)] = C
-
+  
   C2 = matrix(C2, ncol = length(C2) / 12, nrow = 12)
   C2 = t(C2)
   ##print(length(colSums(C2)))
@@ -475,7 +475,7 @@ stFeatureExtraction <- function(signal, win, step){
   #stop("testing stFeatures")
   return (stFeatures)
   
-
+  
 }
 
 mtFeatureExtraction <- function(signal, fs, MtWin, MtStep, stWin, stStep) {
@@ -525,7 +525,7 @@ mtFeatureExtraction <- function(signal, fs, MtWin, MtStep, stWin, stStep) {
     mtFeatures = c(mtFeatures, mt1, mt2)
   }
   mtFeatures = t(matrix(mtFeatures, nrow = numOfFeatures*numOfStatistics))
- #stFeatures = t(matrix(stFeatures, nrow = 33))
+  #stFeatures = t(matrix(stFeatures, nrow = 33))
   #mtFeatures = sapply (mtFeatures, function (x) {length (x) <- length(curStFeatures); return (x)})
   ##print(mtFeatures)
   #stop("wewewe")
@@ -591,13 +591,16 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
   for (files in types){
     wavFilesList = c(wavFilesList, Sys.glob(file.path(dirName, files)))
   }
+  if(length(wavFilesList) == 0){
+    return(NULL)
+  }
   ##print(wavFilesList)
   wavFilesList = sort(wavFilesList)
   wavFilesList2 = c()
   for (i in 1:length(wavFilesList)){
-    print(cat("Analyzing file {0:", i,"} of {1:", length(wavFilesList),"}: {2:", encoded_text_to_latex(wavFilesList[i], encoding = "utf8"),"}"))
+    cat("Analyzing file", i,"of", length(wavFilesList),":", encoded_text_to_latex(wavFilesList[i], encoding = "utf8"),"\n")
     if (file.size(wavFilesList[i]) == 0){
-      print("\t(EMPTY FILE -- SKIPPING)")
+      print("\t(EMPTY FILE -- SKIPPING)\n")
       next
     }
     ##print(cat("wavfile", wavFilesList[i]))
@@ -607,7 +610,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     Fs = wfile@samp.rate
     
     if(length(wfile@left) < (Fs / 10)){
-      print("\tAUDIO FILE TOO SMALL - SKIPPING")
+      print("\tAUDIO FILE TOO SMALL - SKIPPING\n")
       next
     }
     wavFilesList2[length(wavFilesList2) + 1] =  wavFilesList[i]
@@ -654,7 +657,7 @@ dirWavFeatureExtraction <- function(dirName, mtWin, mtStep, stWin, stStep, compu
     }
   }
   if (length(processingTimes) > 0){
-    print(cat("Feature extraction complexity ratio:", mean(processingTimes), "x realtime"))
+    cat("Feature extraction complexity ratio:", mean(processingTimes), "x realtime\n")
   }
   allMtFeatures = t(matrix(allMtFeatures, nrow = rowlength))
   #print(dim(allMtFeatures))
@@ -667,33 +670,41 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
     computeBEAT = FALSE
   }
   features = list()
-  classNames = list()
-  fileNames = list()
+  classNames = c()
+  fileNames = c()
+  shapeF = c()
   for(i in 1:length(dirNames)){
     d = dirNames[i]
     #print(cat("dirname", d))
     dirWavFeatureExtractionReturns = dirWavFeatureExtraction(d, mtWin, mtStep, stWin, stStep)
     f = dirWavFeatureExtractionReturns[[1]]
+    shapeF = dim(f)
     fn = dirWavFeatureExtractionReturns[[2]]
-    if(dim(f) > 0){
-      features = list(features, f)
-      fileNames = list(fileNames, fn)
+    #if(dim(f) > 0){
+      #features = c(features, f)
+      features[[i]] = f
+      fileNames = c(fileNames, fn)
       if (d[length(d)] == .Platform$file.sep){
         x = strsplit(d, .Platform$file.sep)
-        classNames = list(classNames, x[length(x) - 1])
+        classNames = c(classNames, x[[1]][length(x)])
       }
       else{
         x = strsplit(d, .Platform$file.sep)
-        classNames = list(classNames, x[length(x)])
+        #print(x[[1]][length(x) + 1])
+        classNames = c(classNames, x[[1]][length(x) + 1])
       }
-    }
+    #}
     
   }
+  #features = array(features, dim = c(length(dirNames), shapeF[2], shapeF[1]))
+  #print(features[1,,1])
+  #stop("boo")
   return(list(features, classNames, fileNames))
 }
 shortTermWindow = 0.050
 shortTermStep = 0.050
 eps = 0.00000001
 
+#a = dirsWavFeatureExtraction(c("../temp1", "../temp2", "../temp3"), 1.0, 1.0, shortTermWindow, shortTermStep)
 #traceback(dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep))
 #USE SPECTPROP TO ADD MORE PROPERTIES
