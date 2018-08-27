@@ -28,7 +28,6 @@ stEnergy<-function(frame)
 
 stEnergyEntropy<-function(frame, numOfShortBlocks)
 {
-  eps = 0.00000001
   if (missing(numOfShortBlocks)){
     numOfShortBlocks<-10
   }
