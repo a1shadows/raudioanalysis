@@ -71,3 +71,5 @@ coefficients are taken as features. Small musical units are detected the combina
 Chroma vector refers to a set of twelve pitch classes represented as a vector. Distribution of energy is calculated for
 every Chroma vector and as a result we get an updated audio signal of twelve dimensional Chroma distribution
 vector.
+
+The code is divided into various files based on their application. Up to this point, the feature extraction file is complete, while the classification file is in progress.
