@@ -1,6 +1,6 @@
 library("seewave")
 source(paste0("R",.Platform$file.sep,"audioIO.R"))
-eps = 0.00000001
+
 
 #frame will have to be converted into a vector
 
@@ -28,6 +28,7 @@ stEnergy<-function(frame)
 
 stEnergyEntropy<-function(frame, numOfShortBlocks)
 {
+  eps = 0.00000001
   if (missing(numOfShortBlocks)){
     numOfShortBlocks<-10
   }
@@ -77,6 +78,7 @@ stSpectralCentroidAndSpread<-function(X,fs)
 
 stSpectralEntropy<-function(X, numOfShortBlocks)
 {
+  eps = 0.00000001
   if(missing(numOfShortBlocks)){
     numOfShortBlocks<-10
   }
@@ -108,6 +110,7 @@ stSpectralFlux<-function(X,Xprev)
 
 
 stSpectralRollOff <- function(X, c, fs){
+  eps = 0.00000001
   totalEnergy = sum(X ** 2) + eps
   fftlength = length(X)
   Thres = c*totalEnergy
@@ -124,6 +127,7 @@ stSpectralRollOff <- function(X, c, fs){
 
 stHarmonic<-function(frame, fs)
 {
+  eps = 0.00000001
   m = round(0.016*fs) -
     p<-c()
     a<-c()
@@ -217,6 +221,7 @@ stHarmonic<-function(frame, fs)
 
 stChromaFeaturesInit<-function(nfft,fs)
 {
+  
   k=seq(1,nfft)
   freqs=c()
   for (f in k)
@@ -700,9 +705,9 @@ dirsWavFeatureExtraction <- function(dirNames, mtWin, mtStep, stWin, stStep, com
   #stop("boo")
   return(list(features, classNames, fileNames))
 }
-shortTermWindow = 0.050
-shortTermStep = 0.050
-eps = 0.00000001
+#shortTermWindow = 0.050
+#shortTermStep = 0.050
+
 
 #a = dirsWavFeatureExtraction(c("../temp1", "../temp2", "../temp3"), 1.0, 1.0, shortTermWindow, shortTermStep)
 #traceback(dirsWavFeatureExtraction(c("../temp1", "../temp2"), 1.0, 1.0, shortTermWindow, shortTermStep))
